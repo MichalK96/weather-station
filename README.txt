@@ -27,7 +27,7 @@ Opis projektu
 Projekt stacji meteorologicznej, który ma na celu zbieranie danych pogodowych z czujników rozmieszczonych w różnych lokalizacjach i wyświetlanie ich użytkownikowi poprzez przeglądarkę lub dedykowane urządzenie w domu. Głównym celem projektu jest rozwiązanie problemu utrudnionego dostępu do rzeczywistych informacji o pogodzie panującej na zwenątrz niezależnie od miejsca przebywania przy okazji dostarczając zdecydowanie więcej danych na jej temat w porównaniu do domowego termometru za oknem i prezentacji ich w czytelny i przejrzysty sposób. Przy okazji dane są archiwizowane w bazie danych co może być przydatne w przyszłości do analizy klimatu, sprawdzenia pogody w danym dniu jak i generowania podsumowań za dany okres.
 
 Technologie
-- API: Java + Spring Boot, Hibernate, PostgreSql
+- REST API: Java + Spring Boot, Hibernate, PostgreSql
 - Czujniki pogodowe i domowe jednostki wyświetlające: platforma Arduino (C++ i dedykowane biblioteki dla arduino)
 - Deploy: linux platform + serwer Tomcat dostarczany przez Spring Boot
 
