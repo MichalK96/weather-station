@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Repository;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -21,6 +22,7 @@ public class WeatherStationUnitDAO {
     @Column(unique = true)
     private String name;
     private String password;
+    private LocalDateTime created;
     @JsonManagedReference
     @OneToMany(mappedBy = "weatherStationUnit")
     private Set<WeatherReadingDAO> weatherReadings;
