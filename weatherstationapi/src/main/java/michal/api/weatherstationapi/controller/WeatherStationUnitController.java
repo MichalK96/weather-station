@@ -26,8 +26,13 @@ public class WeatherStationUnitController {
         return weatherStationUnitService.list();
     }
 
+    @GetMapping("/{name}")
+    public WeatherStationUnitDAO getByName(@PathVariable String name) {
+        return weatherStationUnitService.getByNameWithoutPassword(name);
+    }
+
     @PostMapping()
-    public ResponseEntity<?> create(@RequestBody WeatherStationUnitDAO weatherStationUnitDAO) {
+    public ResponseEntity<?> save(@RequestBody WeatherStationUnitDAO weatherStationUnitDAO) {
         try {
             var savedWeatherStation = weatherStationUnitService.save(weatherStationUnitDAO);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedWeatherStation);

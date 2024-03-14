@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Repository;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Data
@@ -16,6 +14,12 @@ import java.util.Set;
 @Table(name = "weather_station_unit")
 public class WeatherStationUnitDAO {
 
+    public WeatherStationUnitDAO(Long id, String name, LocalDateTime created) {
+        this.id = id;
+        this.name = name;
+        this.created = created;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,10 +27,10 @@ public class WeatherStationUnitDAO {
     private String name;
     private String password;
     private LocalDateTime created;
-    @JsonManagedReference
-    @OneToMany(mappedBy = "weatherStationUnit")
-    private Set<WeatherReadingDAO> weatherReadings;
-    @JsonManagedReference
-    @OneToMany(mappedBy = "weatherStationUnit", cascade = CascadeType.ALL)
-    private Set<WeatherStationStatusDTO> weatherStationStatus;
+//    @JsonManagedReference
+//    @OneToMany(mappedBy = "weatherStationUnit")
+//    private Set<WeatherReadingDAO> weatherReadings;
+//    @JsonManagedReference
+//    @OneToMany(mappedBy = "weatherStationUnit", cascade = CascadeType.ALL)
+//    private Set<WeatherStationStatusDTO> weatherStationStatus;
 }

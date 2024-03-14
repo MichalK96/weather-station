@@ -26,6 +26,7 @@ public class WeatherStationStatusDTO {
     private int internalTemperature;
     private int accumulatorVoltage;
     private int solarPanelVoltage;
+    private String weatherStationName;
     @JsonBackReference
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "weather_station_unit_id")
