@@ -22,7 +22,7 @@ public class WeatherReadingDAO {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
     private LocalDateTime created;
-    private int temperature;
+    private double temperature;
     private int humidity;
     private int pressure;
     private int sunlight;
@@ -30,6 +30,8 @@ public class WeatherReadingDAO {
     private int precipitation;
     private int windSpeed;
     private String weatherStationName;
+    @Transient
+    private String weatherStationPassword;
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "weather_station_unit_id")

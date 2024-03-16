@@ -38,13 +38,19 @@ public class WeatherReadingService {
         return weatherReadingRepository.findAllDistinctByWeatherStationName(weatherStationName);
     }
 
-    public WeatherReadingDAO save(WeatherReadingDAO weatherReading) {
-        var weatherStationUnit = weatherStationUnitService.getByNameWithPassword(weatherReading.getWeatherStationName());
-        weatherReading.setWeatherStationUnit(weatherStationUnit);
-        if (weatherReading.getCreated() == null) {
-            weatherReading.setCreated(LocalDateTime.now());
+    public int save(List<WeatherReadingDAO> weatherReadings) {
+        var weatherStationUnit = weatherStationUnitService.getByNameWithPassword(weatherReadings.get(0).getWeatherStationName());
+        for (var weatherReading : weatherReadings) {
+            if (!weatherReading.getWeatherStationPassword().equals(weatherStationUnit.getPassword())) {
+                return 401;
+            }
+            weatherReading.setWeatherStationUnit(weatherStationUnit);
+            if (weatherReading.getCreated() == null) {
+                weatherReading.setCreated(LocalDateTime.now());
+            }
+            weatherReadingRepository.save(weatherReading);
         }
-        return weatherReadingRepository.save(weatherReading);
+        return 201;
     }
 
 }
