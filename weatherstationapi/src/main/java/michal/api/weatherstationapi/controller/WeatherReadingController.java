@@ -20,7 +20,12 @@ public class WeatherReadingController {
 
     @PostMapping()
     public ResponseEntity<?> save(@RequestBody WeatherReadingDAO weatherReadingDAO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(weatherReadingService.save(weatherReadingDAO));
+        try {
+        var savedWeatherReading = ResponseEntity.status(HttpStatus.CREATED).body(weatherReadingService.save(weatherReadingDAO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedWeatherReading);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.valueOf(500)).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{weatherStationName}")
