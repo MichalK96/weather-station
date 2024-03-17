@@ -9,20 +9,26 @@
 #include <Adafruit_BME280.h>
 #include <Vector.h>
 #include <TimeLib.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include <cstdio>
 
-String save_url = "http://192.168.1.106:8080/api/weather-reading";
-String WEATHER_STATION_NAME = "test-station";
-String WiFiName = "Cybermax.pl@MK";
-String WiFiPassword = "202305113518";
-String WeatherStationPassword = "1234";
+const String host = "host";
+const String WEATHER_STATION_NAME = "test-station";
+const String WiFiName = "name";
+const String WiFiPassword = "pass";
+const String WeatherStationPassword = "1234";
+
 
 struct Reading {
 String temperature;
 int humidity;
 int pressure;
+String created;
 };
 
-Reading readings[10];
+const int refreshTimeSec = 180;
+Reading readings[250];
 int readingsCount = 0;
 bool APConnected = false;
 HTTPClient http;
@@ -32,27 +38,31 @@ unsigned long pomiarTime = 0;
 int sensorStatus = 0;
 Adafruit_BME280 bme;
 int readingListSize;
+uint64_t  dateMillis;
+char buffer[21];
 
 void setup() {
   Serial.begin(115200);
   Serial.println("\n\nWemos start");
 
-  initSensors();
   readingListSize = countReadingsSize();
+  initSensors();
   WiFi.mode(WIFI_STA);
   startWiFiServices();
 }
 
 
 void loop() {
+  fetchCurrentMillis();
   readValuesFromSensor();
 
   sendData();
-  delay(10000);
+  
+  delay(refreshTimeSec * 1000);
 }
 
 void sendData() {
-  if (!http.begin(save_url)) {
+  if (!http.begin("http://" + host + ":8080/api/weather-reading")) {
     Serial.println("Failed to connect to server");
     return;
   }
@@ -69,7 +79,6 @@ void sendData() {
 }
 
 void clearReadings() {
-  Serial.println("Clearing");
   for (Reading& r : readings) {
     r.temperature = "";
     r.humidity = 0;
@@ -87,6 +96,7 @@ int countReadingsSize() {
 
 String createDataJson() {
   String postData = "[";
+  int count = 0;
   for (Reading r : readings) {
     if (!isReadingValid(r)) {
       break;
@@ -94,13 +104,13 @@ String createDataJson() {
     postData = postData + "{\"temperature\":\"" + r.temperature + "\","
                 + "\"humidity\":\"" + r.humidity + "\","
                 + "\"pressure\":\"" + r.pressure + "\","
-                + "\"created\":\"" + getCurrentTime() + "\","
-                + "\"weatherStationPassword\":\"" + WeatherStationPassword + "\","
+                + "\"createdMillis\":\"" + r.created + "\","
+                + "\"weatherStationPassword\":\"" + "1234" + "\","
                 + "\"weatherStationName\":\"" + WEATHER_STATION_NAME + "\"},\n";
+    Serial.println(postData);
   }
   postData = postData.substring(0, postData.length() - 2);
   postData = postData + "]";
-  Serial.println(postData);
   return postData;
 }
 
@@ -133,7 +143,7 @@ void startWiFiServices() {
     }
   }
 
-    if (WiFi.status() == WL_CONNECTED) {
+  if (WiFi.status() == WL_CONNECTED) {
     APConnected = true;  
     Serial.println("WiFi connected");  
   } else {
@@ -154,6 +164,7 @@ void startWiFiServices() {
     readings[readingsCount].temperature = (String)bme.readTemperature();
     readings[readingsCount].humidity = bme.readHumidity();
     readings[readingsCount].pressure = bme.readPressure();
+    readings[readingsCount].created = getCurrentMillis();
     if (readingsCount < readingListSize) {
       readingsCount++;
     } else {
@@ -161,13 +172,35 @@ void startWiFiServices() {
     }
  }
 
- String getCurrentTime() {
-  time_t currentTime = now();
-  char timeString[20];
-  sprintf(timeString, "%04d-%02d-%02dT%02d:%02d:%02d",
-          year(currentTime), month(currentTime), day(currentTime),
-          hour(currentTime), minute(currentTime), second(currentTime));
-  return String(timeString);
+  String getCurrentMillis() {
+  long long currentTime = dateMillis + millis();
+  if (currentTime < 1710624653298ULL) {
+    return "";
+  }
+  snprintf(buffer, sizeof(buffer), "%lld", currentTime);
+  return buffer;
+}
+
+void fetchCurrentMillis() {
+  http.begin("http://" + host + ":8080/api/weather-reading/current-time");
+  int responseCode = http.GET();
+  if (responseCode == 200) {
+    String payload = http.getString();
+    dateMillis = toLongLong(payload) - millis();
+  } else {
+    Serial.println("Error when fetch millis: " + responseCode);
+  }
+}
+
+long long toLongLong(String value) {
+  long long result = 0;
+  for (int i = 0; i < value.length(); i++) {
+    char c = value.charAt(i);
+    if (c < '0' || c > '9') break;
+    result *= 10;
+    result += (c - '0');
+  }
+  return result;
 }
 
 

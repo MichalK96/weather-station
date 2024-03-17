@@ -38,4 +38,9 @@ public class WeatherReadingController {
         return weatherReadingService.listByWeatherStationName(weatherStationName);
     }
 
+    @GetMapping("/current-time")
+    public long getCurrentTime() {
+        return weatherReadingService.getCurrentTime();
+    }
+
 }

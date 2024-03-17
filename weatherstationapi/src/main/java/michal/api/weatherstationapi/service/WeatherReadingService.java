@@ -7,7 +7,9 @@ import michal.api.weatherstationapi.repository.WeatherReadingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -45,12 +47,23 @@ public class WeatherReadingService {
                 return 401;
             }
             weatherReading.setWeatherStationUnit(weatherStationUnit);
-            if (weatherReading.getCreated() == null) {
+            if (weatherReading.getCreatedMillis() > 1710624653298L) {
+                weatherReading.setCreated(createLocalDateTime(weatherReading.getCreatedMillis()));
+            } else {
                 weatherReading.setCreated(LocalDateTime.now());
             }
             weatherReadingRepository.save(weatherReading);
         }
         return 201;
+    }
+
+    private LocalDateTime createLocalDateTime(long millis) {
+        var instant = Instant.ofEpochMilli(millis);
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+    }
+
+    public long getCurrentTime() {
+        return System.currentTimeMillis();
     }
 
 }

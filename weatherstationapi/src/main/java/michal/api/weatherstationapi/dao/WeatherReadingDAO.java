@@ -32,6 +32,8 @@ public class WeatherReadingDAO {
     private String weatherStationName;
     @Transient
     private String weatherStationPassword;
+    @Transient
+    private long createdMillis;
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "weather_station_unit_id")
