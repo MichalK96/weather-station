@@ -12,9 +12,10 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <cstdio>
+#include <BH1750FVI.h>
 
 const String host = "host";
-const String WEATHER_STATION_NAME = "test-station";
+const String WEATHER_STATION_NAME = "test-station2";
 const String WiFiName = "name";
 const String WiFiPassword = "pass";
 const String WeatherStationPassword = "1234";
@@ -25,10 +26,12 @@ String temperature;
 int humidity;
 int pressure;
 String created;
+String lightIntensity;
 };
 
-const int refreshTimeSec = 180;
-Reading readings[250];
+BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
+const int refreshTimeSec = 10;
+Reading readings[250]; //250
 int readingsCount = 0;
 bool APConnected = false;
 HTTPClient http;
@@ -44,8 +47,8 @@ char buffer[21];
 void setup() {
   Serial.begin(115200);
   Serial.println("\n\nWemos start");
-
   readingListSize = countReadingsSize();
+
   initSensors();
   WiFi.mode(WIFI_STA);
   startWiFiServices();
@@ -55,7 +58,6 @@ void setup() {
 void loop() {
   fetchCurrentMillis();
   readValuesFromSensor();
-
   sendData();
   
   delay(refreshTimeSec * 1000);
@@ -105,6 +107,7 @@ String createDataJson() {
                 + "\"humidity\":\"" + r.humidity + "\","
                 + "\"pressure\":\"" + r.pressure + "\","
                 + "\"createdMillis\":\"" + r.created + "\","
+                + "\"lightIntensity\":\"" + r.lightIntensity + "\","
                 + "\"weatherStationPassword\":\"" + "1234" + "\","
                 + "\"weatherStationName\":\"" + WEATHER_STATION_NAME + "\"},\n";
     Serial.println(postData);
@@ -153,6 +156,8 @@ void startWiFiServices() {
 }
 
  void initSensors() {
+  LightSensor.begin();
+
   if (!bme.begin(0x76)) {
     Serial.println("Sensor BME280 not found");
     return;
@@ -165,6 +170,8 @@ void startWiFiServices() {
     readings[readingsCount].humidity = bme.readHumidity();
     readings[readingsCount].pressure = bme.readPressure();
     readings[readingsCount].created = getCurrentMillis();
+    readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
+  Serial.print("Light: " + readings[readingsCount].lightIntensity);
     if (readingsCount < readingListSize) {
       readingsCount++;
     } else {

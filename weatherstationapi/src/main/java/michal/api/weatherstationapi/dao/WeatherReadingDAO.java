@@ -25,10 +25,11 @@ public class WeatherReadingDAO {
     private double temperature;
     private int humidity;
     private int pressure;
-    private int sunlight;
+    private int lightIntensity;
     private int uvLevel;
     private int precipitation;
     private int windSpeed;
+    @Transient
     private String weatherStationName;
     @Transient
     private String weatherStationPassword;

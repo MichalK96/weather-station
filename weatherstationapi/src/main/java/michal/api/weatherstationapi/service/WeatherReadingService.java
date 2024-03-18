@@ -2,7 +2,9 @@ package michal.api.weatherstationapi.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.Join;
 import michal.api.weatherstationapi.dao.WeatherReadingDAO;
+import michal.api.weatherstationapi.dao.WeatherStationUnitDAO;
 import michal.api.weatherstationapi.repository.WeatherReadingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,9 @@ public class WeatherReadingService {
         var criteriaBuilder = entityManager.getCriteriaBuilder();
         var query = criteriaBuilder.createQuery(WeatherReadingDAO.class);
         var root = query.from(WeatherReadingDAO.class);
+        Join<WeatherReadingDAO, WeatherStationUnitDAO> weatherStationJoin = root.join("weatherStationUnit");
+        query.where(criteriaBuilder.equal(weatherStationJoin.get("name"), weatherStationName));
+
         query.orderBy(criteriaBuilder.desc(root.get("created")));
         var typedQuery = entityManager.createQuery(query);
         typedQuery.setMaxResults(1);
@@ -42,6 +47,9 @@ public class WeatherReadingService {
 
     public int save(List<WeatherReadingDAO> weatherReadings) {
         var weatherStationUnit = weatherStationUnitService.getByNameWithPassword(weatherReadings.get(0).getWeatherStationName());
+        if (weatherStationUnit == null) {
+            return 404;
+        }
         for (var weatherReading : weatherReadings) {
             if (!weatherReading.getWeatherStationPassword().equals(weatherStationUnit.getPassword())) {
                 return 401;

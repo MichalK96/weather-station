@@ -27,10 +27,4 @@ public class WeatherStationUnitDAO {
     private String name;
     private String password;
     private LocalDateTime created;
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "weatherStationUnit")
-//    private Set<WeatherReadingDAO> weatherReadings;
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "weatherStationUnit", cascade = CascadeType.ALL)
-//    private Set<WeatherStationStatusDTO> weatherStationStatus;
 }
