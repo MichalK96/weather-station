@@ -2,6 +2,7 @@ package michal.api.weatherstationapi.controller;
 
 import michal.api.weatherstationapi.dao.WeatherReadingDAO;
 import michal.api.weatherstationapi.service.WeatherReadingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ public class WeatherReadingController {
 
     private final WeatherReadingService weatherReadingService;
 
+    @Autowired
     public WeatherReadingController(WeatherReadingService weatherReadingService) {
         this.weatherReadingService = weatherReadingService;
     }
@@ -29,8 +31,14 @@ public class WeatherReadingController {
     }
 
     @GetMapping("/{weatherStationName}")
-    public WeatherReadingDAO getLastReadingByWeatherStationName(@PathVariable String weatherStationName) {
-        return weatherReadingService.getLastReadingByWeatherStationName(weatherStationName);
+    public ResponseEntity<?> getLastReadingByWeatherStationName(@PathVariable String weatherStationName) {
+        try {
+            var result = weatherReadingService.getLastReadingByWeatherStationName(weatherStationName);
+            if (result == null) return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.valueOf(500)).body(e.getMessage());
+        }
     }
 
     @GetMapping("/list/{weatherStationName}")

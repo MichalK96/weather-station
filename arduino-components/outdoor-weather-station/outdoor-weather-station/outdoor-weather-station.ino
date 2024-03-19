@@ -14,10 +14,10 @@
 #include <cstdio>
 #include <BH1750FVI.h>
 
-const String host = "host";
-const String WEATHER_STATION_NAME = "test-station2";
-const String WiFiName = "name";
-const String WiFiPassword = "pass";
+const String host = "192.168.1.106";
+const String WEATHER_STATION_NAME = "na-zewnatrz-osrodek";
+const String WiFiName = "Cybermax.pl@MK";
+const String WiFiPassword = "202305113518";
 const String WeatherStationPassword = "1234";
 
 
@@ -30,7 +30,7 @@ String lightIntensity;
 };
 
 BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
-const int refreshTimeSec = 10;
+const int refreshTimeSec = 180;
 Reading readings[250]; //250
 int readingsCount = 0;
 bool APConnected = false;

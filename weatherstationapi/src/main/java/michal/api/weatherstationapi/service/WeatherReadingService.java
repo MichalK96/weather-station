@@ -42,7 +42,15 @@ public class WeatherReadingService {
     }
 
     public List<WeatherReadingDAO> listByWeatherStationName(String weatherStationName) {
-        return weatherReadingRepository.findAllDistinctByWeatherStationName(weatherStationName);
+        var weatherStationUnit = weatherStationUnitService.getByNameWithoutPassword(weatherStationName);
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery(WeatherReadingDAO.class);
+        var root = query.from(WeatherReadingDAO.class);
+        Join<WeatherReadingDAO, WeatherStationUnitDAO> weatherStationJoin = root.join("weatherStationUnit");
+        query.where(criteriaBuilder.equal(weatherStationJoin.get("name"), weatherStationName));
+        query.orderBy(criteriaBuilder.desc(root.get("created")));
+        var typedQuery = entityManager.createQuery(query);
+        return typedQuery.getResultList();
     }
 
     public int save(List<WeatherReadingDAO> weatherReadings) {
