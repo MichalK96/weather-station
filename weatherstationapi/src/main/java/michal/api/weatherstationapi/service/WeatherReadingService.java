@@ -63,6 +63,9 @@ public class WeatherReadingService {
                 return 401;
             }
             weatherReading.setWeatherStationUnit(weatherStationUnit);
+            if (weatherReading.getApiResponseCode() == 0) {
+                weatherReading.setApiResponseCode(200);
+            }
             if (weatherReading.getCreatedMillis() > 1710624653298L) {
                 weatherReading.setCreated(createLocalDateTime(weatherReading.getCreatedMillis()));
             } else {

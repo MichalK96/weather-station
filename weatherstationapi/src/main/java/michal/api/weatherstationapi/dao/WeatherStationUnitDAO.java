@@ -28,6 +28,5 @@ public class WeatherStationUnitDAO {
     private String name;
     private String password;
     private LocalDateTime created;
-    @Column(columnDefinition = "INT DEFAULT 300")
     private int refreshTimeSec;
 }

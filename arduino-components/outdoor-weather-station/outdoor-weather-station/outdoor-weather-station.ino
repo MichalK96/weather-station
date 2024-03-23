@@ -15,9 +15,9 @@
 // #include <BH1750FVI.h>
 #include <ArduinoJson.h>
 
-const String host = "192.168.1.100"; //252
+const String host = "host";
 const String WEATHER_STATION_NAME = "name";
-const String WiFiName = "name";
+const String WiFiName = "Cname";
 const String WiFiPassword = "pass";
 const String WeatherStationPassword = "pass";
 
@@ -28,6 +28,7 @@ int humidity;
 int pressure;
 String created;
 String lightIntensity;
+int apiResponseCode;
 };
 
 // BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
@@ -78,6 +79,8 @@ void sendData() {
   if (responseCode == 201) {
     clearReadings();
     readingsCount = 0;
+  } else {
+      readings[readingsCount].apiResponseCode = responseCode;
   }
 }
 
@@ -99,7 +102,7 @@ int countReadingsSize() {
 
 String createDataJson() {
   String postData = "[";
-  int count = 0;
+  int count = 0;                // TODO udunąć
   for (Reading r : readings) {
     if (!isReadingValid(r)) {
       break;
@@ -109,6 +112,7 @@ String createDataJson() {
                 + "\"pressure\":\"" + r.pressure + "\","
                 + "\"createdMillis\":\"" + r.created + "\","
                 + "\"lightIntensity\":\"" + r.lightIntensity + "\","
+                + "\"apiResponseCode\":\"" + r.apiResponseCode + "\","
                 + "\"weatherStationPassword\":\"" + "1234" + "\","
                 + "\"weatherStationName\":\"" + WEATHER_STATION_NAME + "\"},\n";
     // Serial.println(postData);

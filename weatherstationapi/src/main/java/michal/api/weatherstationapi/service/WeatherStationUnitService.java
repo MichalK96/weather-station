@@ -29,12 +29,16 @@ public class WeatherStationUnitService {
         query.select(criteriaBuilder.construct(WeatherStationUnitDAO.class,
                 root.get("id"),
                 root.get("name"),
-                root.get("created")));
+                root.get("created"),
+                root.get("refreshTimeSec")));
         return entityManager.createQuery(query).getResultList();
     }
 
     public WeatherStationUnitDAO save(WeatherStationUnitDAO weatherStationUnit) {
         weatherStationUnit.setCreated(LocalDateTime.now());
+        if (weatherStationUnit.getRefreshTimeSec() == 0) {
+            weatherStationUnit.setRefreshTimeSec(300);
+        }
         return weatherStationUnitRepository.save(weatherStationUnit);
     }
 
