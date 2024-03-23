@@ -14,10 +14,11 @@ import java.time.LocalDateTime;
 @Table(name = "weather_station_unit")
 public class WeatherStationUnitDAO {
 
-    public WeatherStationUnitDAO(Long id, String name, LocalDateTime created) {
+    public WeatherStationUnitDAO(Long id, String name, LocalDateTime created, int refreshTimeSec) {
         this.id = id;
         this.name = name;
         this.created = created;
+        this.refreshTimeSec = refreshTimeSec;
     }
 
     @Id
@@ -27,4 +28,6 @@ public class WeatherStationUnitDAO {
     private String name;
     private String password;
     private LocalDateTime created;
+    @Column(columnDefinition = "INT DEFAULT 300")
+    private int refreshTimeSec;
 }

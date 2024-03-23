@@ -50,7 +50,8 @@ public class WeatherStationUnitService {
         query.select(criteriaBuilder.construct(WeatherStationUnitDAO.class,
                 root.get("id"),
                 root.get("name"),
-                root.get("created")));
+                root.get("created"),
+                root.get("refreshTimeSec")));
         return entityManager.createQuery(query).getSingleResult();
     }
 

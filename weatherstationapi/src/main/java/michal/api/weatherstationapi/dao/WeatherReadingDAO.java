@@ -29,6 +29,7 @@ public class WeatherReadingDAO {
     private int uvLevel;
     private int precipitation;
     private int windSpeed;
+//    private int apiResponseCode;
     @Transient
     private String weatherStationName;
     @Transient

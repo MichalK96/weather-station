@@ -37,11 +37,15 @@ public class WeatherReadingHtmlService {
         query.orderBy(criteriaBuilder.desc(root.get("created")));
         var typedQuery = entityManager.createQuery(query);
         typedQuery.setMaxResults(1);
-        var result = typedQuery.getSingleResult();
-        if (result == null) {
-            return "Nie zneleziono odczytów";
+        try {
+            var result = typedQuery.getSingleResult();
+            return generateLastReading(result, weatherStationName);
+        } catch (Exception e) {
+            if (e.getMessage().contains("No result")) {
+                return "Nie zneleziono odczytów";
+            }
+            return e.getMessage();
         }
-        return generateLastReading(result, weatherStationName);
     }
 
     public String listByWeatherStationName(String weatherStationName) {

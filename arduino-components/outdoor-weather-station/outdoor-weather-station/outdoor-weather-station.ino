@@ -12,13 +12,14 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <cstdio>
-#include <BH1750FVI.h>
+// #include <BH1750FVI.h>
+#include <ArduinoJson.h>
 
-const String host = "192.168.1.106";
-const String WEATHER_STATION_NAME = "na-zewnatrz-osrodek";
-const String WiFiName = "Cybermax.pl@MK";
-const String WiFiPassword = "202305113518";
-const String WeatherStationPassword = "1234";
+const String host = "192.168.1.100"; //252
+const String WEATHER_STATION_NAME = "name";
+const String WiFiName = "name";
+const String WiFiPassword = "pass";
+const String WeatherStationPassword = "pass";
 
 
 struct Reading {
@@ -29,8 +30,8 @@ String created;
 String lightIntensity;
 };
 
-BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
-const int refreshTimeSec = 180;
+// BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
+int refreshTimeSec = 10;
 Reading readings[250]; //250
 int readingsCount = 0;
 bool APConnected = false;
@@ -56,7 +57,7 @@ void setup() {
 
 
 void loop() {
-  fetchCurrentMillis();
+  fetchSettings();
   readValuesFromSensor();
   sendData();
   
@@ -110,7 +111,7 @@ String createDataJson() {
                 + "\"lightIntensity\":\"" + r.lightIntensity + "\","
                 + "\"weatherStationPassword\":\"" + "1234" + "\","
                 + "\"weatherStationName\":\"" + WEATHER_STATION_NAME + "\"},\n";
-    Serial.println(postData);
+    // Serial.println(postData);
   }
   postData = postData.substring(0, postData.length() - 2);
   postData = postData + "]";
@@ -156,7 +157,7 @@ void startWiFiServices() {
 }
 
  void initSensors() {
-  LightSensor.begin();
+  // LightSensor.begin();
 
   if (!bme.begin(0x76)) {
     Serial.println("Sensor BME280 not found");
@@ -170,8 +171,8 @@ void startWiFiServices() {
     readings[readingsCount].humidity = bme.readHumidity();
     readings[readingsCount].pressure = bme.readPressure();
     readings[readingsCount].created = getCurrentMillis();
-    readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
-  Serial.print("Light: " + readings[readingsCount].lightIntensity);
+    // readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
+  // Serial.print("Light: " + readings[readingsCount].lightIntensity);
     if (readingsCount < readingListSize) {
       readingsCount++;
     } else {
@@ -187,6 +188,49 @@ void startWiFiServices() {
   snprintf(buffer, sizeof(buffer), "%lld", currentTime);
   return buffer;
 }
+
+void fetchSettings() {
+  fetchCurrentMillis();
+  fetchRefreshTime();
+}
+
+void fetchRefreshTime() {
+  http.begin("http://" + host + ":8080/api/weather-station/" + WEATHER_STATION_NAME);
+  Serial.println("\nhttp://" + host + ":8080/api/weather-station/" + WEATHER_STATION_NAME);
+  int responseCode = http.GET();
+  if (responseCode == 200) {
+    String payload = http.getString();
+    int refreshTime = parseJsonAndGetRefreshTime(payload);
+    if (refreshTime != 0) {
+      refreshTimeSec = refreshTime;
+    }
+  } else {
+    Serial.println("Error when fetch millis: " + responseCode);
+  }
+}
+
+int parseJsonAndGetRefreshTime(String json) {
+  const size_t bufferSize = JSON_OBJECT_SIZE(5);
+  DynamicJsonDocument jsonBuffer(bufferSize);
+  DeserializationError error = deserializeJson(jsonBuffer, json);
+
+  if (error) {
+    Serial.print("deserializeJson() failed: ");
+    Serial.println(error.c_str());
+    return 0;
+  }
+
+  if (jsonBuffer.containsKey("refreshTimeSec")) {
+    int refreshTimeSec = jsonBuffer["refreshTimeSec"];
+    Serial.print("Wartość refreshTimeSec: ");
+    Serial.println(refreshTimeSec);
+    return refreshTimeSec;
+  } else {
+    Serial.println("No refreshTimeSec field in JSON");
+    return 0;
+  }
+}
+
 
 void fetchCurrentMillis() {
   http.begin("http://" + host + ":8080/api/weather-reading/current-time");
