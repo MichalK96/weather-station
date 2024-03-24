@@ -69,10 +69,11 @@ public class WeatherReadingHtmlService {
                         "<table style=\"width:100%\">" +
                             "<tr>" +
                                 "<th>Odczyt</th>" +
-                                "<th>Temp</th>" +
-                                "<th>Wilgotność</th>" +
-                                "<th>Barometr</th>" +
-                                "<th>Światło</th>" +
+                                "<th>Temp (°C)</th>" +
+                                "<th>Wilgotność (%)</th>" +
+                                "<th>Barometr (hPa)</th>" +
+                                "<th>Światło (lux)</th>" +
+                                "<th>Kod http</th>" +
                             "</tr>" +
                                 generateTableBody(weatherReading) +
                         "</table>" +
@@ -91,13 +92,15 @@ public class WeatherReadingHtmlService {
                                     <th>%s</th>
                                     <th>%s</th>
                                     <th>%s</th>
+                                    <th>%s</th>
                                 </tr>
                                 """,
                     getDate(reading.getCreated()),
                     reading.getTemperature(),
                     reading.getHumidity(),
-                    reading.getPressure(),
-                    reading.getLightIntensity()));
+                    reading.getPressure() / 100,
+                    reading.getLightIntensity(),
+                    reading.getApiResponseCode()));
         }
         return tableBody.toString();
     }

@@ -17,7 +17,7 @@
 
 const String host = "host";
 const String WEATHER_STATION_NAME = "name";
-const String WiFiName = "Cname";
+const String WiFiName = "name";
 const String WiFiPassword = "pass";
 const String WeatherStationPassword = "pass";
 
@@ -34,6 +34,7 @@ int apiResponseCode;
 // BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
 int refreshTimeSec = 10;
 Reading readings[250]; //250
+int pressureOffset = 3300;
 int readingsCount = 0;
 bool APConnected = false;
 HTTPClient http;
@@ -173,7 +174,7 @@ void startWiFiServices() {
   void readValuesFromSensor() {
     readings[readingsCount].temperature = (String)bme.readTemperature();
     readings[readingsCount].humidity = bme.readHumidity();
-    readings[readingsCount].pressure = bme.readPressure();
+    readings[readingsCount].pressure = bme.readPressure() + pressureOffset;
     readings[readingsCount].created = getCurrentMillis();
     // readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
   // Serial.print("Light: " + readings[readingsCount].lightIntensity);
@@ -226,8 +227,6 @@ int parseJsonAndGetRefreshTime(String json) {
 
   if (jsonBuffer.containsKey("refreshTimeSec")) {
     int refreshTimeSec = jsonBuffer["refreshTimeSec"];
-    Serial.print("Wartość refreshTimeSec: ");
-    Serial.println(refreshTimeSec);
     return refreshTimeSec;
   } else {
     Serial.println("No refreshTimeSec field in JSON");
