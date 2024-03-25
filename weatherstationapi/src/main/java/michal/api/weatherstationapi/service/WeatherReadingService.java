@@ -42,7 +42,6 @@ public class WeatherReadingService {
     }
 
     public List<WeatherReadingDAO> listByWeatherStationName(String weatherStationName) {
-        var weatherStationUnit = weatherStationUnitService.getByNameWithoutPassword(weatherStationName);
         var criteriaBuilder = entityManager.getCriteriaBuilder();
         var query = criteriaBuilder.createQuery(WeatherReadingDAO.class);
         var root = query.from(WeatherReadingDAO.class);

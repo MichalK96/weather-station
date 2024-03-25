@@ -1,44 +1,28 @@
-package michal.api.weatherstationapi.htmlresponse.service;
+package michal.api.weatherstationapi.htmlresponse.htmlgenerator;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.Join;
 import michal.api.weatherstationapi.dao.WeatherReadingDAO;
-import michal.api.weatherstationapi.dao.WeatherStationUnitDAO;
-import michal.api.weatherstationapi.repository.WeatherReadingRepository;
-import michal.api.weatherstationapi.service.WeatherStationUnitService;
+import michal.api.weatherstationapi.service.WeatherReadingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
-public class WeatherReadingHtmlService {
+import static michal.api.weatherstationapi.htmlresponse.htmlgenerator.HtmlUtil.generateHtml;
 
-    private final WeatherReadingRepository weatherReadingRepository;
-    private final WeatherStationUnitService weatherStationUnitService;
-    @PersistenceContext
-    private EntityManager entityManager;
+@Service
+public class WeatherReadingHtmlGenerator {
+
+    private final WeatherReadingService weatherReadingService;
 
     @Autowired
-    public WeatherReadingHtmlService(WeatherReadingRepository weatherReadingRepository, WeatherStationUnitService weatherStationUnitService) {
-        this.weatherReadingRepository = weatherReadingRepository;
-        this.weatherStationUnitService = weatherStationUnitService;
+    public WeatherReadingHtmlGenerator(WeatherReadingService weatherReadingService) {
+        this.weatherReadingService = weatherReadingService;
     }
 
     public String getLastReadingByWeatherStationName(String weatherStationName) {
-        var criteriaBuilder = entityManager.getCriteriaBuilder();
-        var query = criteriaBuilder.createQuery(WeatherReadingDAO.class);
-        var root = query.from(WeatherReadingDAO.class);
-        Join<WeatherReadingDAO, WeatherStationUnitDAO> weatherStationJoin = root.join("weatherStationUnit");
-        query.where(criteriaBuilder.equal(weatherStationJoin.get("name"), weatherStationName));
-
-        query.orderBy(criteriaBuilder.desc(root.get("created")));
-        var typedQuery = entityManager.createQuery(query);
-        typedQuery.setMaxResults(1);
         try {
-            var result = typedQuery.getSingleResult();
+            var result = weatherReadingService.getLastReadingByWeatherStationName(weatherStationName);
             return generateLastReading(result, weatherStationName);
         } catch (Exception e) {
             if (e.getMessage().contains("No result")) {
@@ -49,17 +33,10 @@ public class WeatherReadingHtmlService {
     }
 
     public String listByWeatherStationName(String weatherStationName) {
-        var weatherStationUnit = weatherStationUnitService.getByNameWithoutPassword(weatherStationName);
-        var criteriaBuilder = entityManager.getCriteriaBuilder();
-        var query = criteriaBuilder.createQuery(WeatherReadingDAO.class);
-        var root = query.from(WeatherReadingDAO.class);
-        Join<WeatherReadingDAO, WeatherStationUnitDAO> weatherStationJoin = root.join("weatherStationUnit");
-        query.where(criteriaBuilder.equal(weatherStationJoin.get("name"), weatherStationName));
-        query.orderBy(criteriaBuilder.desc(root.get("created")));
-        var typedQuery = entityManager.createQuery(query);
-        var result = typedQuery.getResultList();
+        var result = weatherReadingService.listByWeatherStationName(weatherStationName);
         return generateListReadings(result, weatherStationName);
     }
+
 
     private String generateListReadings(List<WeatherReadingDAO> weatherReading, String name) {
         var body = "<body>" +
@@ -123,32 +100,6 @@ public class WeatherReadingHtmlService {
                 weatherReading.getPressure(),
                 weatherReading.getLightIntensity());
         return generateHtml(name, body);
-    }
-
-    private String generateHtml(String name, String body) {
-        return String.format("""
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>%s</title>
-                        <style>
-                            table, th, td {
-                                font-size: 20px;
-                                border: 2px solid black;
-                                border-collapse: collapse;
-                                padding: 8px;
-                            }
-                            p {
-                                font-size: 20px;
-                               }
-                        </style>
-                </head>
-                %s
-                </html>
-                                
-                """, name, body);
     }
 
     private String getDate(LocalDateTime created) {
