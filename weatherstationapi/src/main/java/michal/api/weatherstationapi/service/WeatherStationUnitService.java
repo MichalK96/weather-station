@@ -34,7 +34,10 @@ public class WeatherStationUnitService {
         return entityManager.createQuery(query).getResultList();
     }
 
-    public WeatherStationUnitDAO save(WeatherStationUnitDAO weatherStationUnit) {
+    public WeatherStationUnitDAO save(WeatherStationUnitDAO weatherStationUnit) throws Exception {
+        if (!validateName(weatherStationUnit.getName())) {
+            throw new Exception("Station name contains illegal characters or long is not between 2-25 characters");  // TODO create dedicate exception
+        }
         weatherStationUnit.setCreated(LocalDateTime.now());
         if (weatherStationUnit.getRefreshTimeSec() == 0) {
             weatherStationUnit.setRefreshTimeSec(300);
@@ -57,6 +60,11 @@ public class WeatherStationUnitService {
                 root.get("created"),
                 root.get("refreshTimeSec")));
         return entityManager.createQuery(query).getSingleResult();
+    }
+
+    private boolean validateName(String name) {
+        String regex = "^[a-zA-Z0-9-_\\/! ]{2,25}$";
+        return name.matches(regex);
     }
 
 }

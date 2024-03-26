@@ -39,8 +39,10 @@ public class WeatherStationUnitController {
         } catch (Exception e) {
             if (e.getMessage().contains("already exist")) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            } else if (e.getMessage().contains("illegal characters")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
             }
-            return ResponseEntity.status(HttpStatusCode.valueOf(500)).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
