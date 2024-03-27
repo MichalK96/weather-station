@@ -12,7 +12,7 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <cstdio>
-// #include <BH1750FVI.h>
+#include <BH1750FVI.h>
 #include <ArduinoJson.h>
 
 const String host = "host";
@@ -31,7 +31,7 @@ String lightIntensity;
 int apiResponseCode;
 };
 
-// BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
+BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
 int refreshTimeSec = 10;
 Reading readings[250]; //250
 int pressureOffset = 3300;
@@ -103,7 +103,7 @@ int countReadingsSize() {
 
 String createDataJson() {
   String postData = "[";
-  int count = 0;                // TODO udunąć
+  // int count = 0;                // TODO udunąć
   for (Reading r : readings) {
     if (!isReadingValid(r)) {
       break;
@@ -116,7 +116,7 @@ String createDataJson() {
                 + "\"apiResponseCode\":\"" + r.apiResponseCode + "\","
                 + "\"weatherStationPassword\":\"" + "1234" + "\","
                 + "\"weatherStationName\":\"" + WEATHER_STATION_NAME + "\"},\n";
-    // Serial.println(postData);
+    Serial.println(postData);
   }
   postData = postData.substring(0, postData.length() - 2);
   postData = postData + "]";
@@ -162,7 +162,7 @@ void startWiFiServices() {
 }
 
  void initSensors() {
-  // LightSensor.begin();
+  LightSensor.begin();
 
   if (!bme.begin(0x76)) {
     Serial.println("Sensor BME280 not found");
@@ -176,8 +176,7 @@ void startWiFiServices() {
     readings[readingsCount].humidity = bme.readHumidity();
     readings[readingsCount].pressure = bme.readPressure() + pressureOffset;
     readings[readingsCount].created = getCurrentMillis();
-    // readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
-  // Serial.print("Light: " + readings[readingsCount].lightIntensity);
+    readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
     if (readingsCount < readingListSize) {
       readingsCount++;
     } else {

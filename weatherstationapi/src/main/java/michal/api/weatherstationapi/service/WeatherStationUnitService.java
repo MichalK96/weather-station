@@ -3,6 +3,7 @@ package michal.api.weatherstationapi.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import michal.api.weatherstationapi.dao.WeatherStationUnitDAO;
+import michal.api.weatherstationapi.exception.ApiErrorException;
 import michal.api.weatherstationapi.repository.WeatherStationUnitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,9 +35,9 @@ public class WeatherStationUnitService {
         return entityManager.createQuery(query).getResultList();
     }
 
-    public WeatherStationUnitDAO save(WeatherStationUnitDAO weatherStationUnit) throws Exception {
+    public WeatherStationUnitDAO save(WeatherStationUnitDAO weatherStationUnit) {
         if (!validateName(weatherStationUnit.getName())) {
-            throw new Exception("Station name contains illegal characters or long is not between 2-25 characters");  // TODO create dedicate exception
+            throw new ApiErrorException("Station name contains illegal characters or long is not between 2-25 characters");
         }
         weatherStationUnit.setCreated(LocalDateTime.now());
         if (weatherStationUnit.getRefreshTimeSec() == 0) {
