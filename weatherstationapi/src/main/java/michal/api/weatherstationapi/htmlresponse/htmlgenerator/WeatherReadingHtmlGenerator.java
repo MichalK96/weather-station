@@ -88,7 +88,7 @@ public class WeatherReadingHtmlGenerator {
                     getDate(reading.getCreated()),
                     reading.getTemperature(),
                     reading.getHumidity(),
-                    reading.getPressure() / 100,
+                    reading.getPressure_hPa(),
                     reading.getLightIntensity(),
                     reading.getApiResponseCode()));
             count++;
@@ -114,7 +114,7 @@ public class WeatherReadingHtmlGenerator {
                 weatherReading.getTemperature(),
                 weatherReading.getHumidity(),
                 "%",
-                weatherReading.getPressure(),
+                weatherReading.getPressure_hPa(),
                 weatherReading.getLightIntensity(),
                 listWeatherReadingUrl,
                 name,

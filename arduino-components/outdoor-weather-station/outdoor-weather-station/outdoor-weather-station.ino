@@ -19,7 +19,7 @@ const String host = "host";
 const String WEATHER_STATION_NAME = "name";
 const String WiFiName = "name";
 const String WiFiPassword = "pass";
-const String WeatherStationPassword = "pass";
+const String weatherStationPassword = "pass";
 
 
 struct Reading {
@@ -32,8 +32,8 @@ int apiResponseCode;
 };
 
 BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
-int refreshTimeSec = 10;
-Reading readings[250]; //250
+int refreshTimeSec = 300;
+Reading readings[250];
 int pressureOffset = 3300;
 int readingsCount = 0;
 bool APConnected = false;
@@ -114,7 +114,7 @@ String createDataJson() {
                 + "\"createdMillis\":\"" + r.created + "\","
                 + "\"lightIntensity\":\"" + r.lightIntensity + "\","
                 + "\"apiResponseCode\":\"" + r.apiResponseCode + "\","
-                + "\"weatherStationPassword\":\"" + "1234" + "\","
+                + "\"weatherStationPassword\":\"" + weatherStationPassword + "\","
                 + "\"weatherStationName\":\"" + WEATHER_STATION_NAME + "\"},\n";
     Serial.println(postData);
   }

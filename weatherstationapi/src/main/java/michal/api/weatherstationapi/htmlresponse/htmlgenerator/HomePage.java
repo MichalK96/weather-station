@@ -18,7 +18,7 @@ public class HomePage {
 
     static final String host = "192.168.1.100";
     private final String weatherReadingUrl = "http://" + host + ":8080/api/html/weather-reading/";
-    private final String weatherStationNameToDisplayReading = "w-domu-osrodek";
+    private final String weatherStationNameToDisplayReading = "na-zewnatrz-osrodek";
 
     @Autowired
     public HomePage(WeatherStationUnitService weatherStationUnitService, WeatherReadingService weatherReadingService) {
@@ -83,7 +83,7 @@ public class HomePage {
                 weatherReading.getTemperature(),
                 weatherReading.getHumidity(),
                 "%",
-                weatherReading.getPressure(),
+                weatherReading.getPressure_hPa(),
                 weatherReading.getLightIntensity());
         return generateHtml(weatherStationNameToDisplayReading, body);
     }

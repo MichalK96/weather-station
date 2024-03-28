@@ -41,4 +41,8 @@ public class WeatherReadingDAO {
     @JoinColumn(name = "weather_station_unit_id")
     private WeatherStationUnitDAO weatherStationUnit;
 
+    public int getPressure_hPa() {
+        return pressure / 100;
+    }
+
 }
