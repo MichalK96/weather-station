@@ -31,10 +31,13 @@ String lightIntensity;
 int apiResponseCode;
 };
 
-BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
 int refreshTimeSec = 300;
-Reading readings[250];
 int pressureOffset = 3300;
+int tempOffset = 0;
+int humidityOffset = 0;
+
+BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
+Reading readings[250];
 int readingsCount = 0;
 bool APConnected = false;
 HTTPClient http;
@@ -103,7 +106,6 @@ int countReadingsSize() {
 
 String createDataJson() {
   String postData = "[";
-  // int count = 0;                // TODO udunąć
   for (Reading r : readings) {
     if (!isReadingValid(r)) {
       break;
@@ -172,8 +174,8 @@ void startWiFiServices() {
  }
 
   void readValuesFromSensor() {
-    readings[readingsCount].temperature = (String)bme.readTemperature();
-    readings[readingsCount].humidity = bme.readHumidity();
+    readings[readingsCount].temperature = (String)bme.readTemperature() + tempOffset;
+    readings[readingsCount].humidity = bme.readHumidity() + humidityOffset;
     readings[readingsCount].pressure = bme.readPressure() + pressureOffset;
     readings[readingsCount].created = getCurrentMillis();
     readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
@@ -195,25 +197,22 @@ void startWiFiServices() {
 
 void fetchSettings() {
   fetchCurrentMillis();
-  fetchRefreshTime();
+  fetchStationSettings();
 }
 
-void fetchRefreshTime() {
+void fetchStationSettings() {
   http.begin("http://" + host + ":8080/api/weather-station/" + WEATHER_STATION_NAME);
   Serial.println("\nhttp://" + host + ":8080/api/weather-station/" + WEATHER_STATION_NAME);
   int responseCode = http.GET();
   if (responseCode == 200) {
     String payload = http.getString();
-    int refreshTime = parseJsonAndGetRefreshTime(payload);
-    if (refreshTime != 0) {
-      refreshTimeSec = refreshTime;
-    }
+    updateStationSettings(payload);
   } else {
     Serial.println("Error when fetch millis: " + responseCode);
   }
 }
 
-int parseJsonAndGetRefreshTime(String json) {
+void updateStationSettings(String json) {
   const size_t bufferSize = JSON_OBJECT_SIZE(5);
   DynamicJsonDocument jsonBuffer(bufferSize);
   DeserializationError error = deserializeJson(jsonBuffer, json);
@@ -221,15 +220,54 @@ int parseJsonAndGetRefreshTime(String json) {
   if (error) {
     Serial.print("deserializeJson() failed: ");
     Serial.println(error.c_str());
-    return 0;
+    return;
   }
 
-  if (jsonBuffer.containsKey("refreshTimeSec")) {
-    int refreshTimeSec = jsonBuffer["refreshTimeSec"];
-    return refreshTimeSec;
+  updateRefreshTime(jsonBuffer);
+  updateTempOffset(jsonBuffer);
+  updateHumidityOffset(jsonBuffer);
+  updatePressureOffset(jsonBuffer);
+
+  Serial.println("Refresh time, Temp, Humidity, Pressure");
+  Serial.println(refreshTimeSec);
+  Serial.println(tempOffset);
+  Serial.println(humidityOffset);
+  Serial.println(pressureOffset);
+
+}
+
+void updatePressureOffset(DynamicJsonDocument data) {
+    if (data.containsKey("pressureOffset")) {
+    pressureOffset = data["pressureOffset"];
+  } else {
+    Serial.println("No pressureOffset field in JSON");
+  }
+}
+
+void updateHumidityOffset(DynamicJsonDocument data) {
+    if (data.containsKey("humidityOffset")) {
+    humidityOffset = data["humidityOffset"];
+  } else {
+    Serial.println("No humidityOffset field in JSON");
+  }
+}
+
+void updateTempOffset(DynamicJsonDocument data) {
+    if (data.containsKey("tempOffset")) {
+    tempOffset = data["tempOffset"];
+  } else {
+    Serial.println("No tempOffset field in JSON");
+  }
+}
+
+void updateRefreshTime(DynamicJsonDocument data) {
+  if (data.containsKey("refreshTimeSec")) {
+    int refreshTime = data["refreshTimeSec"];
+    if (refreshTime != 0) {
+      refreshTimeSec = refreshTime;
+    }
   } else {
     Serial.println("No refreshTimeSec field in JSON");
-    return 0;
   }
 }
 

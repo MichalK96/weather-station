@@ -16,7 +16,7 @@ public class HomePage {
     private final WeatherStationUnitService weatherStationUnitService;
     private final WeatherReadingService weatherReadingService;
 
-    static final String host = "192.168.1.100";
+    static final String host = "192.168.1.252";
     private final String weatherReadingUrl = "http://" + host + ":8080/api/html/weather-reading/";
     private final String weatherStationNameToDisplayReading = "na-zewnatrz-osrodek";
 

@@ -59,7 +59,10 @@ public class WeatherStationUnitService {
                 root.get("id"),
                 root.get("name"),
                 root.get("created"),
-                root.get("refreshTimeSec")));
+                root.get("refreshTimeSec"),
+                root.get("tempOffset"),
+                root.get("humidityOffset"),
+                root.get("pressureOffset")));
         return entityManager.createQuery(query).getSingleResult();
     }
 
