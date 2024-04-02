@@ -33,7 +33,7 @@ int apiResponseCode;
 
 int refreshTimeSec = 300;
 int pressureOffset = 3300;
-int tempOffset = 0;
+float tempOffset = 0;
 int humidityOffset = 0;
 
 BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
@@ -118,7 +118,7 @@ String createDataJson() {
                 + "\"apiResponseCode\":\"" + r.apiResponseCode + "\","
                 + "\"weatherStationPassword\":\"" + weatherStationPassword + "\","
                 + "\"weatherStationName\":\"" + WEATHER_STATION_NAME + "\"},\n";
-    Serial.println(postData);
+    // Serial.println(postData);
   }
   postData = postData.substring(0, postData.length() - 2);
   postData = postData + "]";
@@ -174,7 +174,7 @@ void startWiFiServices() {
  }
 
   void readValuesFromSensor() {
-    readings[readingsCount].temperature = (String)bme.readTemperature() + tempOffset;
+    readings[readingsCount].temperature = (String)(bme.readTemperature() + tempOffset);
     readings[readingsCount].humidity = bme.readHumidity() + humidityOffset;
     readings[readingsCount].pressure = bme.readPressure() + pressureOffset;
     readings[readingsCount].created = getCurrentMillis();
@@ -227,13 +227,6 @@ void updateStationSettings(String json) {
   updateTempOffset(jsonBuffer);
   updateHumidityOffset(jsonBuffer);
   updatePressureOffset(jsonBuffer);
-
-  Serial.println("Refresh time, Temp, Humidity, Pressure");
-  Serial.println(refreshTimeSec);
-  Serial.println(tempOffset);
-  Serial.println(humidityOffset);
-  Serial.println(pressureOffset);
-
 }
 
 void updatePressureOffset(DynamicJsonDocument data) {
