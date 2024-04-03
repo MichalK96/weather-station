@@ -43,6 +43,11 @@ public class WeatherReadingHtmlGenerator {
         return generateListReadings(result, weatherStationName);
     }
 
+    public String getHoursSummaryByWeatherStationName(String weatherStationName) {
+        var result = weatherReadingService.calculateHourlyAverages(weatherStationName);
+        return "";
+    }
+
 
     private String generateListReadings(List<WeatherReadingDAO> weatherReading, String name) {
         var body = "<body>" +

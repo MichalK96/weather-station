@@ -29,4 +29,9 @@ public class WeatherReadingHtmlController {
         return weatherReadingService.listByWeatherStationName(weatherStationName);
     }
 
+    @GetMapping("/hours-summary/{weatherStationName}")
+    public String getHoursSummaryByWeatherStationName(@PathVariable String weatherStationName) {
+        return weatherReadingService.getHoursSummaryByWeatherStationName(weatherStationName);
+    }
+
 }
