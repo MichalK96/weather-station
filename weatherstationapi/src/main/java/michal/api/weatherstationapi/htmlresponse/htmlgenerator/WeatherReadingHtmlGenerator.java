@@ -1,11 +1,14 @@
 package michal.api.weatherstationapi.htmlresponse.htmlgenerator;
 
 import michal.api.weatherstationapi.dao.WeatherReadingDAO;
+import michal.api.weatherstationapi.service.WeatherDataAverages;
 import michal.api.weatherstationapi.service.WeatherReadingService;
 import michal.api.weatherstationapi.service.WeatherStationUnitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -43,11 +46,59 @@ public class WeatherReadingHtmlGenerator {
         return generateListReadings(result, weatherStationName);
     }
 
-    public String getHoursSummaryByWeatherStationName(String weatherStationName) {
-        var result = weatherReadingService.calculateHourlyAverages(weatherStationName);
-        return "";
+    public String listHoursSummaryByWeatherStationName(String weatherStationName) {
+        var weatherDataAverages = weatherReadingService.calculateHourlyAverages(weatherStationName);
+        return generateHoursSummary(weatherDataAverages, weatherStationName);
     }
 
+    private String generateHoursSummary(List<WeatherDataAverages> weatherData, String name) {
+        var body = "<body>" +
+                        "<br><h1>" +
+                            "Podsumowanie godzinowe (wyniki uśrednione): " + name +
+                        "</h1><br>" +
+                        "<table style=\"width:100%\">" +
+                            "<tr>" +
+                                "<th></th>" +
+                                "<th>Godzina</th>" +
+                                "<th>Temp (°C)</th>" +
+                                "<th>Wilgotność (%)</th>" +
+                                "<th>Barometr (hPa)</th>" +
+                                "<th>Światło (lux)</th>" +
+                            "</tr>" +
+                            generateTableBodyHoursSummary(weatherData) +
+                        "</table>" +
+                    "</body>";
+
+        return generateHtml("Podsumowanie godzinowe" + name, body);
+    }
+
+    private String generateTableBodyHoursSummary(List<WeatherDataAverages> weatherReading) {
+        var tableBody = new StringBuilder();
+        var count = 1;
+        for (var reading : weatherReading) {
+            if (count >= listReadingsLimit) {
+                break;
+            }
+            tableBody.append(String.format("""
+                                <tr>
+                                    <th>%s</th>
+                                    <th>%s</th>
+                                    <th>%s</th>
+                                    <th>%s</th>
+                                    <th>%s</th>
+                                    <th>%s</th>
+                                </tr>
+                                """,
+                    count,
+                    reading.getHour(),
+                    BigDecimal.valueOf(reading.getAvgTemperature()).setScale(1, RoundingMode.HALF_UP),
+                    reading.getAvgHumidity().setScale(0, RoundingMode.HALF_UP),
+                    reading.getAvgPressure().setScale(0, RoundingMode.HALF_UP),
+                    reading.getAvgLightIntensity().setScale(0, RoundingMode.HALF_UP)));
+            count++;
+        }
+        return tableBody.toString();
+    }
 
     private String generateListReadings(List<WeatherReadingDAO> weatherReading, String name) {
         var body = "<body>" +
@@ -64,14 +115,14 @@ public class WeatherReadingHtmlGenerator {
                                 "<th>Światło (lux)</th>" +
                                 "<th>Kod http</th>" +
                             "</tr>" +
-                                generateTableBody(weatherReading) +
+                                generateTableBodyListReadings(weatherReading) +
                         "</table>" +
                     "</body>";
 
         return generateHtml("Podsumowanie " + name, body);
     }
 
-    private String generateTableBody(List<WeatherReadingDAO> weatherReading) {
+    private String generateTableBodyListReadings(List<WeatherReadingDAO> weatherReading) {
         var tableBody = new StringBuilder();
         var count = 1;
         for (var reading : weatherReading) {

@@ -31,7 +31,7 @@ public class WeatherReadingHtmlController {
 
     @GetMapping("/hours-summary/{weatherStationName}")
     public String getHoursSummaryByWeatherStationName(@PathVariable String weatherStationName) {
-        return weatherReadingService.getHoursSummaryByWeatherStationName(weatherStationName);
+        return weatherReadingService.listHoursSummaryByWeatherStationName(weatherStationName);
     }
 
 }

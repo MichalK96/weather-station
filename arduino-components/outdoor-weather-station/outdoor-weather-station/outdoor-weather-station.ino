@@ -15,11 +15,11 @@
 #include <BH1750FVI.h>
 #include <ArduinoJson.h>
 
-const String host = "192.168.1.100";  //252
-const String WEATHER_STATION_NAME = "na-zewnatrz-osrodek";
-const String WiFiName = "Cybermax.pl@MK";
-const String WiFiPassword = "202305113518";
-const String weatherStationPassword = "golcowa66/1";
+const String host = "host";
+const String WEATHER_STATION_NAME = "name";
+const String WiFiName = "name";
+const String WiFiPassword = "pass";
+const String weatherStationPassword = "pass";
 
 
 struct Reading {
