@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 @Setter
 public class WeatherDataAverages {
 
+    private Date date;
     private BigDecimal hour;
     private Double avgTemperature;
     private BigDecimal avgHumidity;

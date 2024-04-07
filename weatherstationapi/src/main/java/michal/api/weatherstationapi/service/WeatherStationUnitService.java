@@ -66,10 +66,17 @@ public class WeatherStationUnitService {
                 root.get("tempOffset"),
                 root.get("humidityOffset"),
                 root.get("pressureOffset")));
-        return entityManager.createQuery(query).getSingleResult();
+        try {
+            return entityManager.createQuery(query).getSingleResult();
+        } catch (Exception e) {
+            if (e.getMessage().contains("No result found")) {
+                return null;
+            }
+            throw e;
+        }
     }
 
-    private boolean validateName(String name) {
+    public static boolean validateName(String name) {
         String regex = "^[a-zA-Z0-9-_\\/! ]{2,25}$";
         return name.matches(regex);
     }

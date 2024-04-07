@@ -77,9 +77,14 @@ public class WeatherReadingService {
         return 201;
     }
 
-    public List<WeatherDataAverages> calculateHourlyAverages(String weatherStationName) {
-        var sqlQuery = """
+    public List<WeatherDataAverages> calculateHourlyAverages(String weatherStationName, int hours) {
+        if (!WeatherStationUnitService.validateName(weatherStationName) ||
+                weatherStationUnitService.getByNameWithoutPassword(weatherStationName) == null) {
+            return List.of();
+        }
+        var sqlQuery = String.format("""
                     SELECT
+                        DATE(weather_reading.created) AS date,
                         EXTRACT(HOUR FROM weather_reading.created) AS hour,
                         AVG(temperature) AS avg_temperature,
                         AVG(humidity) AS avg_humidity,
@@ -93,29 +98,33 @@ public class WeatherReadingService {
                     JOIN
                         weather_station_unit ON weather_reading.weather_station_unit_id=weather_station_unit.id
                     WHERE
-                        weather_station_unit.name = 'na-zewnatrz-osrodek' AND
-                        weather_reading.created > NOW() - INTERVAL '24 HOUR'
+                        weather_station_unit.name = '%s' AND
+                        weather_reading.created > NOW() - INTERVAL '%s HOUR'
                     GROUP BY
-                        hour
+                        date, hour
                     ORDER BY
-                        hour DESC    
-                """;
+                        date DESC, hour DESC
+                """, weatherStationName, hours);
         var query = entityManager.createNativeQuery(sqlQuery);
-        return mapResult(query.getResultList());                // TODO refactor
+        return mapResult(query.getResultList(), hours);                // TODO refactor
     }
 
-    private List<WeatherDataAverages> mapResult(List<Object[]> result) {
+    private List<WeatherDataAverages> mapResult(List<Object[]> result, int hours) {
         var mappedResult = new ArrayList<WeatherDataAverages>();
+        if (result.size() > hours) {
+            result.remove(result.size() - 1);
+        }
         for (Object[] object : result) {
             var weatherDataAverages = new WeatherDataAverages();
-            weatherDataAverages.setHour((BigDecimal) object[0]);
-            weatherDataAverages.setAvgTemperature((Double) object[1]);
-            weatherDataAverages.setAvgHumidity((BigDecimal) object[2]);
-            weatherDataAverages.setAvgPressure((BigDecimal) object[3]);
-            weatherDataAverages.setAvgLightIntensity((BigDecimal) object[4]);
-            weatherDataAverages.setAvgUvLevel((BigDecimal) object[5]);
-            weatherDataAverages.setAvgPrecipitation((BigDecimal) object[6]);
-            weatherDataAverages.setAvgWindSpeed((BigDecimal) object[7]);
+            weatherDataAverages.setDate((Date) object[0]);
+            weatherDataAverages.setHour((BigDecimal) object[1]);
+            weatherDataAverages.setAvgTemperature((Double) object[2]);
+            weatherDataAverages.setAvgHumidity((BigDecimal) object[3]);
+            weatherDataAverages.setAvgPressure((BigDecimal) object[4]);
+            weatherDataAverages.setAvgLightIntensity((BigDecimal) object[5]);
+            weatherDataAverages.setAvgUvLevel((BigDecimal) object[6]);
+            weatherDataAverages.setAvgPrecipitation((BigDecimal) object[7]);
+            weatherDataAverages.setAvgWindSpeed((BigDecimal) object[8]);
 
             mappedResult.add(weatherDataAverages);
         }

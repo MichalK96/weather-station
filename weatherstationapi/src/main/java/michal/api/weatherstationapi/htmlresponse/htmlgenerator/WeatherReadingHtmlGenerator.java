@@ -21,6 +21,7 @@ public class WeatherReadingHtmlGenerator {
     private final WeatherStationUnitService weatherStationUnitService;
 
     private final String listWeatherReadingUrl = "http://" + HomePage.host + ":8080/api/html/weather-reading/list/";
+    private final String hoursSummary = "http://" + HomePage.host + ":8080/api/html/weather-reading/hours-summary/";
     private final int listReadingsLimit = 5000;
 
     @Autowired
@@ -46,20 +47,23 @@ public class WeatherReadingHtmlGenerator {
         return generateListReadings(result, weatherStationName);
     }
 
-    public String listHoursSummaryByWeatherStationName(String weatherStationName) {
-        var weatherDataAverages = weatherReadingService.calculateHourlyAverages(weatherStationName);
-        return generateHoursSummary(weatherDataAverages, weatherStationName);
+    public String listHoursSummaryByWeatherStationName(String weatherStationName, int hours) {
+        var weatherDataAverages = weatherReadingService.calculateHourlyAverages(weatherStationName, hours);
+        if (weatherDataAverages.isEmpty()) {
+            return "Nie znaleziono stacji o nazwie " + weatherStationName;
+        }
+        return generateHoursSummary(weatherDataAverages, weatherStationName, hours);
     }
 
-    private String generateHoursSummary(List<WeatherDataAverages> weatherData, String name) {
+    private String generateHoursSummary(List<WeatherDataAverages> weatherData, String name, int hours) {
         var body = "<body>" +
                         "<br><h1>" +
-                            "Podsumowanie godzinowe (wyniki uśrednione): " + name +
+                            "Podsumowanie godzinowe (wyniki uśrednione z " + hours + " ostatnich godzin) dla stacji : " + name +
                         "</h1><br>" +
                         "<table style=\"width:100%\">" +
                             "<tr>" +
                                 "<th></th>" +
-                                "<th>Godzina</th>" +
+                                "<th>Odczyt</th>" +
                                 "<th>Temp (°C)</th>" +
                                 "<th>Wilgotność (%)</th>" +
                                 "<th>Barometr (hPa)</th>" +
@@ -90,7 +94,7 @@ public class WeatherReadingHtmlGenerator {
                                 </tr>
                                 """,
                     count,
-                    reading.getHour(),
+                    reading.getDate() + " - " + reading.getHour(),
                     BigDecimal.valueOf(reading.getAvgTemperature()).setScale(1, RoundingMode.HALF_UP),
                     reading.getAvgHumidity().setScale(0, RoundingMode.HALF_UP),
                     reading.getAvgPressure().setScale(0, RoundingMode.HALF_UP),
@@ -162,7 +166,8 @@ public class WeatherReadingHtmlGenerator {
                     <p>Barometr: %s hPa</p>
                     <p>Ilość światła: %s lux</p>
                     <br>
-                    <a href=%s%s>%s</a><br>
+                    <a href=%s%s/24>Podsumowanie z ostatnich 24 godzin</a><br><br>
+                    <a href=%s%s>Pełna historia odczytów</a>
                 </body>
                 """,
                 name,
@@ -172,9 +177,10 @@ public class WeatherReadingHtmlGenerator {
                 "%",
                 weatherReading.getPressure_hPa(),
                 weatherReading.getLightIntensity(),
-                listWeatherReadingUrl,
+                hoursSummary,
                 name,
-                "Historia odczytów");
+                listWeatherReadingUrl,
+                name);
         return generateHtml(name, body);
     }
 
