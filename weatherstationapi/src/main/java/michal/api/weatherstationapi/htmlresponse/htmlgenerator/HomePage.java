@@ -18,7 +18,7 @@ public class HomePage {
 
     static final String host = "host";
     private final String weatherReadingUrl = "http://" + host + ":8080/api/html/weather-reading/";
-    private final String weatherStationNameToDisplayReading = "name";
+    private final String weatherStationNameToDisplayReadingOnHomePage = "name";
 
     @Autowired
     public HomePage(WeatherStationUnitService weatherStationUnitService, WeatherReadingService weatherReadingService) {
@@ -70,7 +70,7 @@ public class HomePage {
     }
 
     private String generateSimplifiedWeatherReading() {
-        var weatherReading = weatherReadingService.getLastReadingByWeatherStationName(weatherStationNameToDisplayReading);
+        var weatherReading = weatherReadingService.getLastReadingByWeatherStationName(weatherStationNameToDisplayReadingOnHomePage);
         if (!isReadingCurrent(weatherReading.getCreated())) {
             return "Aktualny odczyt nie jest dostępny";
         }
@@ -85,7 +85,7 @@ public class HomePage {
                 "%",
                 weatherReading.getPressure_hPa(),
                 weatherReading.getLightIntensity());
-        return generateHtml(weatherStationNameToDisplayReading, body);
+        return generateHtml(weatherStationNameToDisplayReadingOnHomePage, body);
     }
 
     private boolean isReadingCurrent(LocalDateTime creationDate) {

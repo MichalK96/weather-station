@@ -13,7 +13,7 @@ Weather sensors and display units: Arduino platform (C++ and dedicated Arduino l
 Deployment: Linux platform + Tomcat server provided by Spring Boot
 
 Project status
-The project is in the initial development phase and is not yet available.
+The project has achieved MVP and presentation is possible.
 
 Additional Information
 There is an opportunity to present the project using my production API upon prior contact.
@@ -32,7 +32,7 @@ Technologie
 - Deploy: linux platform + serwer Tomcat dostarczany przez Spring Boot
 
 Status projektu
-Projekt jest w początkowej fazie rozwoju, nie jest na ten moment dostępny.
+Projekt osiągnął MVP i jest możliwa prezentacja.
 
 Dodatkowe informacje
 Istnieje możliwość prezentacji projektu z wykorzystaniem mojego produkcyjnego API po wcześniejszym kontakcie.
