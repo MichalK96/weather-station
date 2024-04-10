@@ -84,7 +84,7 @@ public class WeatherReadingHtmlGenerator {
                 break;
             }
             tableBody.append(String.format("""
-                                <tr>
+                                <tr%s>
                                     <th>%s</th>
                                     <th>%s</th>
                                     <th>%s</th>
@@ -93,6 +93,7 @@ public class WeatherReadingHtmlGenerator {
                                     <th>%s</th>
                                 </tr>
                                 """,
+                    count % 2 == 0 ?  " style=\"background-color: #e6e6e6;\"" : "",
                     count,
                     reading.getDate() + " - " + reading.getHour(),
                     BigDecimal.valueOf(reading.getAvgTemperature()).setScale(1, RoundingMode.HALF_UP),
@@ -134,7 +135,7 @@ public class WeatherReadingHtmlGenerator {
                 break;
             }
             tableBody.append(String.format("""
-                                <tr>
+                                <tr%s>
                                     <th>%s</th>
                                     <th>%s</th>
                                     <th>%s</th>
@@ -144,6 +145,7 @@ public class WeatherReadingHtmlGenerator {
                                     <th>%s</th>
                                 </tr>
                                 """,
+                    count % 2 == 0 ?  " style=\"background-color: #e6e6e6;\"" : "",
                     count,
                     getDate(reading.getCreated()),
                     reading.getTemperature(),
@@ -166,8 +168,8 @@ public class WeatherReadingHtmlGenerator {
                     <p>Barometr: %s hPa</p>
                     <p>Ilość światła: %s lux</p>
                     <br>
-                    <a href=%s%s/24>Podsumowanie z ostatnich 24 godzin</a><br><br>
-                    <a href=%s%s>Pełna historia odczytów</a>
+                    <a href=%s%s/24 class="button">Podsumowanie z ostatnich 24 godzin</a><br><br>
+                    <a href=%s%s class="button">Pełna historia odczytów</a>
                 </body>
                 """,
                 name,

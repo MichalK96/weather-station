@@ -17,9 +17,19 @@ class HtmlUtil {
                                 border-collapse: collapse;
                                 padding: 8px;
                             }
+                            
                             p {
                                 font-size: 20px;
                                }
+                               
+                           a.button {
+                               padding: 4px 6px;
+                               border: 3px outset buttonborder;
+                               border-radius: 3px;
+                               color: buttontext;
+                               background-color: buttonface;
+                               text-decoration: none;
+                           }
                         </style>
                 </head>
                 %s
