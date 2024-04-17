@@ -99,7 +99,7 @@ public class WeatherReadingHtmlGenerator {
                     reading.getDate().getDay() + " " + parseMonth(reading.getDate().getMonth()) + ", godz. " + reading.getHour(),
                     BigDecimal.valueOf(reading.getAvgTemperature()).setScale(1, RoundingMode.HALF_UP),
                     reading.getAvgHumidity().setScale(0, RoundingMode.HALF_UP),
-                    reading.getAvgPressure().setScale(0, RoundingMode.HALF_UP),
+                    Integer.parseInt(String.valueOf(reading.getAvgPressure().setScale(0, RoundingMode.HALF_UP))) / 100,
                     reading.getAvgLightIntensity().setScale(0, RoundingMode.HALF_UP)));
             count++;
         }
