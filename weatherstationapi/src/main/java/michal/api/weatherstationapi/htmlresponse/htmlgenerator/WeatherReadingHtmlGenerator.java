@@ -1,6 +1,7 @@
 package michal.api.weatherstationapi.htmlresponse.htmlgenerator;
 
 import michal.api.weatherstationapi.dao.WeatherReadingDAO;
+import michal.api.weatherstationapi.htmlresponse.Util;
 import michal.api.weatherstationapi.service.WeatherDataAverages;
 import michal.api.weatherstationapi.service.WeatherReadingService;
 import michal.api.weatherstationapi.service.WeatherStationUnitService;
@@ -23,7 +24,6 @@ public class WeatherReadingHtmlGenerator {
     private final String listWeatherReadingUrl = "http://" + HomePage.host + ":8080/api/html/weather-reading/list/";
     private final String hoursSummary = "http://" + HomePage.host + ":8080/api/html/weather-reading/hours-summary/";
     private final int listReadingsLimit = 5000;
-    private final String[] months = {"styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec", "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień"};
 
     @Autowired
     public WeatherReadingHtmlGenerator(WeatherReadingService weatherReadingService, WeatherStationUnitService weatherStationUnitService) {
@@ -96,7 +96,8 @@ public class WeatherReadingHtmlGenerator {
                                 """,
                     count % 2 == 0 ?  " style=\"background-color: #e6e6e6;\"" : "",
                     count,
-                    reading.getDate().getDay() + " " + parseMonth(reading.getDate().getMonth()) + ", godz. " + reading.getHour(),
+                    Util.getDayOfWeekName(reading.getDate()) + " - " + Util.getMonthDay(reading.getDate()) + " " +
+                            Util.getMonthName(reading.getDate()) + " - godz. " + reading.getHour(),
                     BigDecimal.valueOf(reading.getAvgTemperature()).setScale(1, RoundingMode.HALF_UP),
                     reading.getAvgHumidity().setScale(0, RoundingMode.HALF_UP),
                     Integer.parseInt(String.valueOf(reading.getAvgPressure().setScale(0, RoundingMode.HALF_UP))) / 100,
@@ -104,10 +105,6 @@ public class WeatherReadingHtmlGenerator {
             count++;
         }
         return tableBody.toString();
-    }
-
-    private String parseMonth(int month) {
-        return month >= 0 && month <= 12 ? months[month - 1] : "----";
     }
 
     private String generateListReadings(List<WeatherReadingDAO> weatherReading, String name) {
