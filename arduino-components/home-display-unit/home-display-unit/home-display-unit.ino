@@ -48,7 +48,6 @@ int readingsCount = 0;
 bool APConnected = false;
 HTTPClient http;
 int progress = 0;
-bool errorOccured = false;
 unsigned long pomiarTime = 0;
 int sensorStatus = 0;
 
@@ -66,11 +65,6 @@ void setup() {
   WiFi.mode(WIFI_STA);
   startWiFiServices();
 
-  lcd.print("Temperature:", 0, 0);
-  lcd.pictograms.tempIcon(2, 2);
-  lcd.pictograms.pressureIcon(3, 2);
-  lcd.pictograms.sunIcon(4, 2);
-
 
 }
 
@@ -78,9 +72,6 @@ void setup() {
 void loop() {
   fetchSettings();
   readValuesFromSensor();
-
-  lcd.print(readings[readingsCount - 1].temperature, 12, 0);
-
   sendData();
   refreshDisplayData();
 
@@ -164,13 +155,21 @@ void loadSettings(void *data_dest, size_t size) {
 
 void startWiFiServices() {
   Serial.println("Connecting with WiFi\n");
+  lcd.print("Laczenie z WiFi", 0, 0);
   int countWifi = 0;
   WiFi.begin(WiFiName, WiFiPassword);
 
+  lcd.setCursor(0, 1);
   while (WiFi.status() != WL_CONNECTED) {
-    delay(330);
+    delay(500);   //330
+    if (countWifi == 20) {
+      lcd.setCursor(0, 2);
+    } else if (countWifi == 40) {
+      lcd.setCursor(0, 3);
+    }
     Serial.print(".");
-    countWifi+=1;
+    lcd.print(".");
+    countWifi += 1;
     if (countWifi>60) {
       break;
     }
@@ -179,10 +178,29 @@ void startWiFiServices() {
   if (WiFi.status() == WL_CONNECTED) {
     APConnected = true;  
     Serial.println("WiFi connected");  
+    lcd.clear();
+    lcd.print("WiFi OK", 6, 1);
+    delay(4000);
+    lcd.clear();
   } else {
     Serial.print("WiFi NOT CONNECTED");
-    errorOccured = true;
+    lcd.clear();
+    lcd.print("PROBLEM Z WiFi", 0, 0);
+    restartAfterTimeSec(60);
   }
+}
+
+void restartAfterTimeSec(int time) {
+  while (true) {
+    lcd.print("Za " + (String) time + "s nastapi reset", 0, 2);
+    delay(1000);
+    time--;
+    if (time == 0) {
+      lcd.clear();
+      ESP.restart();
+    }
+  }
+  
 }
 
  void initSensors() {

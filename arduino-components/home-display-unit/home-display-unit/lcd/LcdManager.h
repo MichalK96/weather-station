@@ -13,14 +13,22 @@ public:
         analogWrite(lcdPin, 1023);
     };
 
+    void setCursor(int x, int y) {
+        lcd.setCursor(x, y);
+    };
+
     void print(String text) {
         lcd.print(text);
-    }
+    };
 
     void print(String text, int x, int y) {
         lcd.setCursor(x, y);
         lcd.print(text);
-    }
+    };
+
+    void clear() {
+        lcd.clear();
+    };
 
 private:
     LiquidCrystal_I2C lcd;
