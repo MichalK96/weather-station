@@ -1,9 +1,10 @@
 #include <LiquidCrystal_I2C.h>
+#include "LcdPictograms.h"
 
 class LcdManager {
 
 public:
-    LcdManager() : lcd(0x27, 20, 4) {};
+    LcdManager() : lcd(0x27, 20, 4), pictograms(lcd) {};
     LcdPictograms pictograms;
 
     void init() {

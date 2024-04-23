@@ -35,7 +35,7 @@ int apiResponseCode;
 };
 
 int refreshTimeSec = 10;
-int pressureOffset = 3300;
+int pressureOffset = 0;
 float tempOffset = 0;
 int humidityOffset = 0;
 int lcdBrightness = 100;
@@ -43,7 +43,6 @@ int lcdBrightness = 100;
 LcdManager lcd;
 ArtronShop_SHT3x sht3x(0x44, &Wire);
 BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);
-int lcdPin = D7;
 Reading readings[250];
 int readingsCount = 0;
 bool APConnected = false;
@@ -68,6 +67,11 @@ void setup() {
   startWiFiServices();
 
   lcd.print("Temperature:", 0, 0);
+  lcd.pictograms.tempIcon(2, 2);
+  lcd.pictograms.pressureIcon(3, 2);
+  lcd.pictograms.sunIcon(4, 2);
+
+
 }
 
 
