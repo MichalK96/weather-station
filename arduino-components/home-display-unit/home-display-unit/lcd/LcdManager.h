@@ -30,6 +30,10 @@ public:
         lcd.clear();
     };
 
+    void displayPictograms() {
+        pictograms.tempIcon(0, 0);
+    };
+
 private:
     LiquidCrystal_I2C lcd;
     int lcdPin = D7;

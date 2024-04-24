@@ -64,22 +64,18 @@ void setup() {
   initSensors();
   WiFi.mode(WIFI_STA);
   startWiFiServices();
-
-
+  lcd.displayPictograms();
+  readValuesFromSensor();
+  readingsCount--;
 }
-
 
 void loop() {
   fetchSettings();
   readValuesFromSensor();
-  sendData();
   refreshDisplayData();
+  sendData();
 
   delay(refreshTimeSec * 1000);
-}
-
-void refreshDisplayData() {
-
 }
 
 void sendData() {
@@ -358,3 +354,43 @@ long long toLongLong(String value) {
   return result;
 }
 
+void refreshDisplayData() {
+  lcd.print(roundTemp(readings[readingsCount - 1].temperature), 1, 0);
+}
+
+String roundTemp(String temperature) {
+  char tempValue[20];
+  temperature.toCharArray(tempValue, 20);
+  String temp = (String) roundToNearestHalf(atof(tempValue));
+  String result;
+  for (int i = 0; i < temp.length(); i++) {
+    if (temp[i] == '.') {
+      if (temp[i + 1] == '0') {
+        result = result + "  ";
+        return result;
+      } else {
+        result = result + temp[i];
+        result = result + temp[i + 1];
+        return result;
+      }
+    }
+    result = result + temp[i];
+  }
+  return result;
+}
+
+double roundToNearestHalf(double value) {
+    double integerPart;
+    double fractionalPart = modf(value, &integerPart);
+    double roundedFractionalPart;
+
+    if (fractionalPart < 0.25) {
+        roundedFractionalPart = 0.0;
+    } else if (fractionalPart < 0.75) {
+        roundedFractionalPart = 0.5;
+    } else {
+        roundedFractionalPart = 1.0;
+    }
+
+    return integerPart + roundedFractionalPart;
+}
