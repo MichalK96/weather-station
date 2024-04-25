@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("home-display")
@@ -24,6 +23,11 @@ public class HomeDisplayUnitController {
     @GetMapping()
     public List<HomeDisplayUnitDAO> list() {
         return homeDisplayUnitService.list();
+    }
+
+    @GetMapping("/{name}")
+    public HomeDisplayUnitDAO getByName(@PathVariable String name) {
+        return homeDisplayUnitService.getByNameWithoutPassword(name);
     }
 
     @PostMapping()
