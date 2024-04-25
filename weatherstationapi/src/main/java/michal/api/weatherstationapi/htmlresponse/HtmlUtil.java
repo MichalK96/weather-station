@@ -3,8 +3,9 @@ package michal.api.weatherstationapi.htmlresponse;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Util {
+public class HtmlUtil {
 
+    private HtmlUtil() {};
     private static final String[] months = {"styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec", "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień"};
 
     public static String getDayOfWeekName(Date date) {

@@ -19,8 +19,9 @@ public class HomeDisplayUnitDAO {
     @Column(unique = true)
     private String name;
     private LocalDateTime created;
-    @Column(columnDefinition = "INT DEFAULT 30000")
-    private int refreshPeriod;
+    private int refreshTimeSec;
+    private int brightness;
+    private String password;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "weather_station_unit_id", referencedColumnName = "id")
     private WeatherStationUnitDAO weatherStationUnit;

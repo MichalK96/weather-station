@@ -1,7 +1,7 @@
 package michal.api.weatherstationapi.htmlresponse.htmlgenerator;
 
 import michal.api.weatherstationapi.dao.WeatherReadingDAO;
-import michal.api.weatherstationapi.htmlresponse.Util;
+import michal.api.weatherstationapi.htmlresponse.HtmlUtil;
 import michal.api.weatherstationapi.service.WeatherDataAverages;
 import michal.api.weatherstationapi.service.WeatherReadingService;
 import michal.api.weatherstationapi.service.WeatherStationUnitService;
@@ -96,8 +96,8 @@ public class WeatherReadingHtmlGenerator {
                                 """,
                     count % 2 == 0 ?  " style=\"background-color: #e6e6e6;\"" : "",
                     count,
-                    Util.getDayOfWeekName(reading.getDate()) + " - " + Util.getMonthDay(reading.getDate()) + " " +
-                            Util.getMonthName(reading.getDate()) + " - godz. " + reading.getHour(),
+                    HtmlUtil.getDayOfWeekName(reading.getDate()) + " - " + HtmlUtil.getMonthDay(reading.getDate()) + " " +
+                            HtmlUtil.getMonthName(reading.getDate()) + " - godz. " + reading.getHour(),
                     BigDecimal.valueOf(reading.getAvgTemperature()).setScale(1, RoundingMode.HALF_UP),
                     reading.getAvgHumidity().setScale(0, RoundingMode.HALF_UP),
                     Integer.parseInt(String.valueOf(reading.getAvgPressure().setScale(0, RoundingMode.HALF_UP))) / 100,

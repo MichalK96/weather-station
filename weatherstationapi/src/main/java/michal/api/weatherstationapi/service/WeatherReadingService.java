@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.Join;
 import michal.api.weatherstationapi.dao.WeatherReadingDAO;
 import michal.api.weatherstationapi.dao.WeatherStationUnitDAO;
 import michal.api.weatherstationapi.repository.WeatherReadingRepository;
+import michal.api.weatherstationapi.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,7 +79,7 @@ public class WeatherReadingService {
     }
 
     public List<WeatherDataAverages> calculateHourlyAverages(String weatherStationName, int hours) {
-        if (!WeatherStationUnitService.validateName(weatherStationName) ||
+        if (!Util.validateName(weatherStationName) ||
                 weatherStationUnitService.getByNameWithoutPassword(weatherStationName) == null) {
             return List.of();
         }

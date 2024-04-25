@@ -32,9 +32,9 @@ public class WeatherStationUnitController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> save(@RequestBody WeatherStationUnitDAO weatherStationUnitDAO) {
+    public ResponseEntity<?> save(@RequestBody WeatherStationUnitDAO weatherStationUnit) {
         try {
-            var savedWeatherStation = weatherStationUnitService.save(weatherStationUnitDAO);
+            var savedWeatherStation = weatherStationUnitService.save(weatherStationUnit);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedWeatherStation);
         } catch (Exception e) {
             if (e.getMessage().contains("already exist")) {
