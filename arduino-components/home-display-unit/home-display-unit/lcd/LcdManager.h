@@ -13,6 +13,16 @@ public:
         analogWrite(lcdPin, 1023);
     };
 
+    void setBrightness(int brightness) {
+        if (brightness >= 0 && brightness <= 100) {
+            if (brightness == 100) {
+                analogWrite(lcdPin, 1023);
+            } else {
+                analogWrite(lcdPin, brightness * 10);
+            }
+        }
+    }
+
     void setCursor(int x, int y) {
         lcd.setCursor(x, y);
     };
@@ -31,7 +41,9 @@ public:
     };
 
     void displayPictograms() {
-        pictograms.tempIcon(0, 0);
+        pictograms.homeIcon(0, 0);
+        pictograms.tempIcon(2, 0);
+        pictograms.humidityIcon(8, 0);
     };
 
 private:

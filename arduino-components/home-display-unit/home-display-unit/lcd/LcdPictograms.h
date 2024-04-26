@@ -41,6 +41,12 @@ public:
    lcd.printByte(3); 
   }
 
+  void homeIcon(int x, int y) {
+   lcd.createChar(4, (uint8_t*) home);
+   lcd.setCursor(x, y);
+   lcd.printByte(4); 
+  }
+
 private:
   LiquidCrystal_I2C& lcd;
 
@@ -86,6 +92,17 @@ private:
     B01110,
     B10001,
     B00000
+  };
+
+    const uint8_t home[8] = {
+    B00000,
+    B00000,
+    B00100,
+    B01110,
+    B11111,
+    B01010,
+    B01110,
+    B11111
   };
 
 };

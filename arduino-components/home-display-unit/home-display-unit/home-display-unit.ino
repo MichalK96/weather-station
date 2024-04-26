@@ -34,7 +34,8 @@ String lightIntensity;
 int apiResponseCode;
 };
 
-int refreshTimeSec = 10;
+int weatherStationRefreshTimeSec = 300;
+int homeDisplayRefreshTimeSec = 60;
 int pressureOffset = 0;
 float tempOffset = 0;
 int humidityOffset = 0;
@@ -48,11 +49,10 @@ int readingsCount = 0;
 bool APConnected = false;
 HTTPClient http;
 int progress = 0;
-unsigned long pomiarTime = 0;
 int sensorStatus = 0;
 
 int readingListSize;
-uint64_t  dateMillis;
+uint64_t  timestamp;
 char buffer[21];
 
 void setup() {
@@ -75,7 +75,7 @@ void loop() {
   refreshDisplayData();
   sendData();
 
-  delay(refreshTimeSec * 1000);
+  delay(weatherStationRefreshTimeSec * 1000);
 }
 
 void sendData() {
@@ -241,7 +241,7 @@ void restartAfterTimeSec(int time) {
  }
 
   String getCurrentMillis() {
-  long long currentTime = dateMillis + millis();
+  long long currentTime = timestamp + millis();
   if (currentTime < 1710624653298ULL) {
     return "";
   }
@@ -250,20 +250,25 @@ void restartAfterTimeSec(int time) {
 }
 
 void fetchSettings() {
-  fetchCurrentMillis();
-  fetchStationSettings();
-  fetchHomeUnitSettings();
+  fetchTimestamp();
+  fetchAndUpdateWeatherStationSettings();
+  fetchAndUpdateHomeDisplaySettings();
 }
 
-void fetchHomeUnitSettings() {
-
-  updateHomeUnitSettings();
-
+void fetchAndUpdateHomeDisplaySettings() {
+  http.begin("http://" + host + ":8080/api/home-display/" + WEATHER_STATION_NAME);
+  Serial.println("\nhttp://" + host + ":8080/api/home-display/" + WEATHER_STATION_NAME);
+  int responseCode = http.GET();
+  if (responseCode == 200) {
+    String payload = http.getString();
+    updateHomeUnitSettings(payload);
+  } else {
+    Serial.println("Error when fetch millis: " + responseCode);
+  }
 }
 
-void fetchStationSettings() {
+void fetchAndUpdateWeatherStationSettings() {
   http.begin("http://" + host + ":8080/api/weather-station/" + WEATHER_STATION_NAME);
-  Serial.println("\nhttp://" + host + ":8080/api/weather-station/" + WEATHER_STATION_NAME);
   int responseCode = http.GET();
   if (responseCode == 200) {
     String payload = http.getString();
@@ -273,11 +278,39 @@ void fetchStationSettings() {
   }
 }
 
-void updateHomeUnitSettings() {
-  int b = lcdBrightness * 10;
-  // analogWrite(lcdPin, b);
+void updateHomeUnitSettings(String json) {
+  const size_t bufferSize = JSON_OBJECT_SIZE(5);
+  DynamicJsonDocument jsonBuffer(bufferSize);
+  DeserializationError error = deserializeJson(jsonBuffer, json);
 
+  if (error) {
+    Serial.print("deserializeJson() failed: ");
+    Serial.println(error.c_str());
+    return;
+  }
+  updateHomeUnitRefrestTime(jsonBuffer);
+  updateBrightness(jsonBuffer);
 }
+
+void updateBrightness(DynamicJsonDocument data) {
+  if (data.containsKey("brightness")) {
+    lcd.setBrightness(data["brightness"]);
+  } else {
+    Serial.println("No brightness field in JSON");
+  }
+}
+
+void updateHomeUnitRefrestTime(DynamicJsonDocument data) {
+  if (data.containsKey("refreshTimeSec")) {
+    int refreshTime = data["refreshTimeSec"];
+    if (refreshTime != 0) {
+      homeDisplayRefreshTimeSec = refreshTime;
+    }
+  } else {
+    Serial.println("No refreshTimeSec field in JSON");
+  }
+}
+
 
 void updateStationSettings(String json) {
   const size_t bufferSize = JSON_OBJECT_SIZE(5);
@@ -290,7 +323,7 @@ void updateStationSettings(String json) {
     return;
   }
 
-  updateRefreshTime(jsonBuffer);
+  updateWeatherStationRefreshTime(jsonBuffer);
   updateTempOffset(jsonBuffer);
   updateHumidityOffset(jsonBuffer);
   updatePressureOffset(jsonBuffer);
@@ -320,11 +353,11 @@ void updateTempOffset(DynamicJsonDocument data) {
   }
 }
 
-void updateRefreshTime(DynamicJsonDocument data) {
+void updateWeatherStationRefreshTime(DynamicJsonDocument data) {
   if (data.containsKey("refreshTimeSec")) {
     int refreshTime = data["refreshTimeSec"];
     if (refreshTime != 0) {
-      refreshTimeSec = refreshTime;
+      weatherStationRefreshTimeSec = refreshTime;
     }
   } else {
     Serial.println("No refreshTimeSec field in JSON");
@@ -332,12 +365,12 @@ void updateRefreshTime(DynamicJsonDocument data) {
 }
 
 
-void fetchCurrentMillis() {
+void fetchTimestamp() {
   http.begin("http://" + host + ":8080/api/weather-reading/current-time");
   int responseCode = http.GET();
   if (responseCode == 200) {
     String payload = http.getString();
-    dateMillis = toLongLong(payload) - millis();
+    timestamp = toLongLong(payload) - millis();
   } else {
     Serial.println("Error when fetch millis: " + responseCode);
   }
@@ -355,7 +388,8 @@ long long toLongLong(String value) {
 }
 
 void refreshDisplayData() {
-  lcd.print(roundTemp(readings[readingsCount - 1].temperature), 1, 0);
+  lcd.print(roundTemp(readings[readingsCount - 1].temperature), 3, 0);
+  lcd.print(String(readings[readingsCount - 1].humidity), 9, 0);
 }
 
 String roundTemp(String temperature) {
