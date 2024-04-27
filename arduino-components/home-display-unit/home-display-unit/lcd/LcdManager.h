@@ -48,6 +48,7 @@ public:
         pictograms.tempIcon(2, 2);
         pictograms.humidityIcon(9, 2);
         pictograms.pressureIcon(13, 2);
+        pictograms.lightIcon(0, 3);
     };
 
 private:

@@ -20,6 +20,7 @@
 
 const String host = "host";
 const String WEATHER_STATION_NAME = "name";
+const String OUTSIDE_WEATHER_STATION_NAME = "name";
 const String WiFiName = "name";
 const String WiFiPassword = "pass";
 const String weatherStationPassword = "pass";
@@ -410,6 +411,12 @@ void refreshDisplayData() {
     lcd.print(fillByEmptyChars(String(roundedPressure), 4), 14, 2);
   } else {
     lcd.print("--", 14, 2);
+  }
+
+  if (jsonData.containsKey("lightIntensity")) {
+    lcd.print(fillByEmptyChars(jsonData["lightIntensity"], 5), 1, 3);
+  } else {
+    lcd.print("--", 1, 3);
   }
 }
 

@@ -30,27 +30,33 @@ public:
   }
 
   void pressureIcon(int x, int y) {
-   lcd.createChar(2, (uint8_t*) pressure);
-   lcd.setCursor(x, y);
-   lcd.printByte(2); 
+    lcd.createChar(2, (uint8_t*) pressure);
+    lcd.setCursor(x, y);
+    lcd.printByte(2); 
   }
 
   void sunIcon(int x, int y) {
-   lcd.createChar(3, (uint8_t*) sun);
-   lcd.setCursor(x, y);
-   lcd.printByte(3); 
+    lcd.createChar(3, (uint8_t*) sun);
+    lcd.setCursor(x, y);
+    lcd.printByte(3); 
   }
 
   void homeIcon(int x, int y) {
-   lcd.createChar(4, (uint8_t*) home);
-   lcd.setCursor(x, y);
-   lcd.printByte(4); 
+    lcd.createChar(4, (uint8_t*) home);
+    lcd.setCursor(x, y);
+    lcd.printByte(4); 
   }
 
   void treeIcon(int x, int y) {
-   lcd.createChar(5, (uint8_t*) tree);
-   lcd.setCursor(x, y);
-   lcd.printByte(5); 
+    lcd.createChar(5, (uint8_t*) tree);
+    lcd.setCursor(x, y);
+    lcd.printByte(5); 
+  }
+
+  void lightIcon(int x, int y) {
+    lcd.createChar(6, (uint8_t*) light);
+    lcd.setCursor(x, y);
+    lcd.printByte(6); 
   }
 
 private:
@@ -121,4 +127,16 @@ private:
     B00100,
     B11111
   };
+
+    const uint8_t light[8] = {
+    B00000,
+    B00100,
+    B00100,
+    B01110,
+    B10001,
+    B00000,
+    B00000,
+    B00000
+  };
+
 };
