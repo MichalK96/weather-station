@@ -47,6 +47,12 @@ public:
    lcd.printByte(4); 
   }
 
+  void treeIcon(int x, int y) {
+   lcd.createChar(5, (uint8_t*) tree);
+   lcd.setCursor(x, y);
+   lcd.printByte(5); 
+  }
+
 private:
   LiquidCrystal_I2C& lcd;
 
@@ -105,4 +111,14 @@ private:
     B11111
   };
 
+    const uint8_t tree[8] = {
+    B00100,
+    B00100,
+    B01110,
+    B01110,
+    B11111,
+    B00100,
+    B00100,
+    B11111
+  };
 };

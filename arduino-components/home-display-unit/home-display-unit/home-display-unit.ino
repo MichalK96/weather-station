@@ -199,48 +199,47 @@ void restartAfterTimeSec(int time) {
   
 }
 
- void initSensors() {
-  LightSensor.begin();
+void initSensors() {
+LightSensor.begin();
 
-  // if (!bme.begin(0x76)) {
-  //   Serial.println("Sensor BME280 not found");
-  //   return;
-  // }
+// if (!bme.begin(0x76)) {
+//   Serial.println("Sensor BME280 not found");
+//   return;
+// }
 
-  Wire.begin();
-  while (!sht3x.begin()) {
-    Serial.println("SHT3x not found !");
-    delay(1000);
+Wire.begin();
+while (!sht3x.begin()) {
+  Serial.println("SHT3x not found !");
+  delay(1000);
+}
+
+Serial.println("Sensor ready");
+}
+
+void readValuesFromSensor() {
+  readings[readingsCount].temperature = (String)(sht3x.temperature() + tempOffset);
+  readings[readingsCount].humidity = sht3x.humidity() + humidityOffset;
+  readings[readingsCount].created = getCurrentMillis();
+  readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
+  if (readingsCount < readingListSize) {
+    readingsCount++;
+  } else {
+    readingsCount = 0;
   }
 
-  Serial.println("Sensor ready");
- }
-
-  void readValuesFromSensor() {
-    readings[readingsCount].temperature = (String)(sht3x.temperature() + tempOffset);
-    readings[readingsCount].humidity = sht3x.humidity() + humidityOffset;
-    readings[readingsCount].created = getCurrentMillis();
-    readings[readingsCount].lightIntensity = LightSensor.GetLightIntensity();
-    if (readingsCount < readingListSize) {
-      readingsCount++;
-    } else {
-      readingsCount = 0;
-    }
-
-    if (sht3x.measure()) {
-    Serial.print("Temperature: ");
-    Serial.print(sht3x.temperature(), 1);
-    Serial.print(" *C\tHumidity: ");
-    Serial.print(sht3x.humidity(), 1);
-    Serial.print(" %RH");
-    Serial.println();
+  if (sht3x.measure()) {
+  Serial.print("Temperature: ");
+  Serial.print(sht3x.temperature(), 1);
+  Serial.print(" *C\tHumidity: ");
+  Serial.print(sht3x.humidity(), 1);
+  Serial.print(" %RH");
+  Serial.println();
   } else {
     Serial.println("SHT3x read error");
   }
+}
 
- }
-
-  String getCurrentMillis() {
+String getCurrentMillis() {
   long long currentTime = timestamp + millis();
   if (currentTime < 1710624653298ULL) {
     return "";
@@ -388,8 +387,61 @@ long long toLongLong(String value) {
 }
 
 void refreshDisplayData() {
-  lcd.print(roundTemp(readings[readingsCount - 1].temperature), 3, 0);
-  lcd.print(String(readings[readingsCount - 1].humidity), 9, 0);
+  lcd.print(fillByEmptyChars(roundTemp(readings[readingsCount - 1].temperature), 5), 3, 0);
+  lcd.print(String(readings[readingsCount - 1].humidity), 10, 0);
+
+  DynamicJsonDocument jsonData = getOutsideWeatherData();
+
+  if (jsonData.containsKey("temperature")) {
+    lcd.print(fillByEmptyChars(roundTemp(jsonData["temperature"]), 5), 3, 2);
+  } else {
+    lcd.print("--", 3, 2);
+  }
+
+  if (jsonData.containsKey("humidity")) {
+    lcd.print(fillByEmptyChars(jsonData["humidity"], 3), 10, 2);
+  } else {
+    lcd.print("--", 10, 2);
+  }
+
+  if (jsonData.containsKey("pressure")) {
+    String pressure = jsonData["pressure"];
+    int roundedPressure = round(pressure.toFloat() / 100.0);
+    lcd.print(fillByEmptyChars(String(roundedPressure), 4), 14, 2);
+  } else {
+    lcd.print("--", 14, 2);
+  }
+}
+
+String fillByEmptyChars(String value, int totalLength) {
+  int length = value.length();
+  while (value.length() < totalLength) {
+    value += " ";
+  }
+  return value;
+}
+
+DynamicJsonDocument getOutsideWeatherData() {
+  http.begin("http://" + host + ":8080/api/weather-reading/" + OUTSIDE_WEATHER_STATION_NAME);
+  int responseCode = http.GET();
+  String payload;
+  if (responseCode == 200) {
+    payload = http.getString();
+  } else {
+    Serial.println("Error when fetch millis: " + responseCode);
+    return NULL;
+  }
+
+  const size_t bufferSize = JSON_OBJECT_SIZE(5);
+  DynamicJsonDocument jsonBuffer(bufferSize);
+  DeserializationError error = deserializeJson(jsonBuffer, payload);
+
+  if (error) {
+    Serial.print("deserializeJson() failed: ");
+    Serial.println(error.c_str());
+    return NULL;
+  }
+  return jsonBuffer;
 }
 
 String roundTemp(String temperature) {
@@ -400,7 +452,6 @@ String roundTemp(String temperature) {
   for (int i = 0; i < temp.length(); i++) {
     if (temp[i] == '.') {
       if (temp[i + 1] == '0') {
-        result = result + "  ";
         return result;
       } else {
         result = result + temp[i];
@@ -414,6 +465,12 @@ String roundTemp(String temperature) {
 }
 
 double roundToNearestHalf(double value) {
+  boolean isPositive = true;
+    if (value < 0) {
+      value = -value;
+      isPositive = false;
+    }
+    
     double integerPart;
     double fractionalPart = modf(value, &integerPart);
     double roundedFractionalPart;
@@ -426,5 +483,6 @@ double roundToNearestHalf(double value) {
         roundedFractionalPart = 1.0;
     }
 
-    return integerPart + roundedFractionalPart;
+    double result = integerPart + roundedFractionalPart;
+    return (isPositive) ? result : -result;
 }

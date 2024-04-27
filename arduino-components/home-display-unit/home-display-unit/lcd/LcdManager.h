@@ -43,7 +43,11 @@ public:
     void displayPictograms() {
         pictograms.homeIcon(0, 0);
         pictograms.tempIcon(2, 0);
-        pictograms.humidityIcon(8, 0);
+        pictograms.humidityIcon(9, 0);
+        pictograms.treeIcon(0, 2);
+        pictograms.tempIcon(2, 2);
+        pictograms.humidityIcon(9, 2);
+        pictograms.pressureIcon(13, 2);
     };
 
 private:
