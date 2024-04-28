@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static michal.api.weatherstationapi.htmlresponse.htmlgenerator.HtmlUtil.generateHtml;
 
@@ -77,10 +79,15 @@ public class WeatherReadingHtmlGenerator {
         return generateHtml("Podsumowanie godzinowe" + name, body);
     }
 
-    private String generateTableBodyHoursSummary(List<WeatherDataAverages> weatherReading) {
+    private String generateTableBodyHoursSummary(List<WeatherDataAverages> weatherReadings) {
         var tableBody = new StringBuilder();
         var count = 1;
-        for (var reading : weatherReading) {
+        var highestTempReading = findHighestTempReading(weatherReadings);
+        var lowestTempReading = findLowestTempReading(weatherReadings);
+        if (highestTempReading.isEmpty() || lowestTempReading.isEmpty()) {
+            return "";
+        }
+        for (var reading : weatherReadings) {
             if (count >= listReadingsLimit) {
                 break;
             }
@@ -94,7 +101,7 @@ public class WeatherReadingHtmlGenerator {
                                     <th>%s</th>
                                 </tr>
                                 """,
-                    count % 2 == 0 ?  " style=\"background-color: #e6e6e6;\"" : "",
+                    setBackground(reading, highestTempReading.get(), lowestTempReading.get(), count),
                     count,
                     HtmlUtil.getDayOfWeekName(reading.getDate()) + " - " + HtmlUtil.getMonthDay(reading.getDate()) + " " +
                             HtmlUtil.getMonthName(reading.getDate()) + " - godz. " + reading.getHour(),
@@ -105,6 +112,26 @@ public class WeatherReadingHtmlGenerator {
             count++;
         }
         return tableBody.toString();
+    }
+
+    private String setBackground(WeatherDataAverages currentReading, WeatherDataAverages highestTemp,
+                                 WeatherDataAverages lowestTemp, int count) {
+        if (currentReading.equals(highestTemp)) {
+            return " style=\"background-color: #FFB6C1;\"";
+        } else if (currentReading.equals(lowestTemp)) {
+            return " style=\"background-color: #ADD8E6;\"";
+        }
+        return count % 2 == 0 ?  " style=\"background-color: #e6e6e6;\"" : "";
+    }
+
+    private Optional<WeatherDataAverages> findHighestTempReading(List<WeatherDataAverages> weatherDataAverages) {
+        return weatherDataAverages.stream()
+                .max(Comparator.comparingDouble(WeatherDataAverages::getAvgTemperature));
+    }
+
+    private Optional<WeatherDataAverages> findLowestTempReading(List<WeatherDataAverages> weatherDataAverages) {
+        return weatherDataAverages.stream()
+                .min(Comparator.comparingDouble(WeatherDataAverages::getAvgTemperature));
     }
 
     private String generateListReadings(List<WeatherReadingDAO> weatherReading, String name) {
