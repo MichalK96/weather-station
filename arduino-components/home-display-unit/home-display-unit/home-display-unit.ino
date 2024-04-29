@@ -388,13 +388,13 @@ long long toLongLong(String value) {
 }
 
 void refreshDisplayData() {
-  lcd.print(fillByEmptyChars(roundTemp(readings[readingsCount - 1].temperature), 5), 3, 0);
-  lcd.print(String(readings[readingsCount - 1].humidity), 10, 0);
+  lcd.print(fillByEmptyChars(validateAndRoundTemp(readings[readingsCount - 1].temperature), 5), 3, 0);
+  lcd.print(fillByEmptyChars(validateAndConvertHumidity(readings[readingsCount - 1].humidity), 2), 10, 0);
 
   DynamicJsonDocument jsonData = getOutsideWeatherData();
 
   if (jsonData.containsKey("temperature")) {
-    lcd.print(fillByEmptyChars(roundTemp(jsonData["temperature"]), 5), 3, 2);
+    lcd.print(fillByEmptyChars(validateAndRoundTemp(jsonData["temperature"]), 5), 3, 2);
   } else {
     lcd.print("--", 3, 2);
   }
@@ -418,6 +418,13 @@ void refreshDisplayData() {
   } else {
     lcd.print("--", 1, 3);
   }
+}
+
+String validateAndConvertHumidity(int humidity) {
+  if (humidity >= 0 && humidity <= 100) {
+    return (String) humidity;
+  }
+  return "--";
 }
 
 String fillByEmptyChars(String value, int totalLength) {
@@ -451,24 +458,34 @@ DynamicJsonDocument getOutsideWeatherData() {
   return jsonBuffer;
 }
 
-String roundTemp(String temperature) {
+String validateAndRoundTemp(String temperature) {
   char tempValue[20];
   temperature.toCharArray(tempValue, 20);
-  String temp = (String) roundToNearestHalf(atof(tempValue));
+  double temp = roundToNearestHalf(atof(tempValue));
+
+  if (!isInRangeDouble(temp, -60, 100)) {
+    return "--";
+  }
+
+  temperature = (String) temp;
   String result;
-  for (int i = 0; i < temp.length(); i++) {
-    if (temp[i] == '.') {
-      if (temp[i + 1] == '0') {
+  for (int i = 0; i < temperature.length(); i++) {
+    if (temperature[i] == '.') {
+      if (temperature[i + 1] == '0') {
         return result;
       } else {
-        result = result + temp[i];
-        result = result + temp[i + 1];
+        result = result + temperature[i];
+        result = result + temperature[i + 1];
         return result;
       }
     }
-    result = result + temp[i];
+    result = result + temperature[i];
   }
   return result;
+}
+
+bool isInRangeDouble(double value, double min, double max) {
+  return (value >= min && value <= max);
 }
 
 double roundToNearestHalf(double value) {
