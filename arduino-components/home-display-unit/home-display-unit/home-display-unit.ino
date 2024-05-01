@@ -396,13 +396,13 @@ void refreshDisplayData() {
   if (jsonData.containsKey("temperature")) {
     lcd.print(fillByEmptyChars(validateAndRoundTemp(jsonData["temperature"]), 5), 3, 2);
   } else {
-    lcd.print("--", 3, 2);
+    lcd.print(fillByEmptyChars("--", 5), 3, 2);
   }
 
   if (jsonData.containsKey("humidity")) {
     lcd.print(fillByEmptyChars(jsonData["humidity"], 3), 10, 2);
   } else {
-    lcd.print("--", 10, 2);
+    lcd.print(fillByEmptyChars("--", 3), 10, 2);
   }
 
   if (jsonData.containsKey("pressure")) {
@@ -410,13 +410,13 @@ void refreshDisplayData() {
     int roundedPressure = round(pressure.toFloat() / 100.0);
     lcd.print(fillByEmptyChars(String(roundedPressure), 4), 14, 2);
   } else {
-    lcd.print("--", 14, 2);
+    lcd.print(fillByEmptyChars("--", 4), 14, 2);
   }
 
   if (jsonData.containsKey("lightIntensity")) {
     lcd.print(fillByEmptyChars(jsonData["lightIntensity"], 5), 1, 3);
   } else {
-    lcd.print("--", 1, 3);
+    lcd.print(fillByEmptyChars("--", 5), 1, 3);
   }
 }
 
