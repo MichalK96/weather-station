@@ -105,13 +105,36 @@ public class WeatherReadingHtmlGenerator {
                     count,
                     HtmlUtil.getDayOfWeekName(reading.getDate()) + " - " + HtmlUtil.getMonthDay(reading.getDate()) + " " +
                             HtmlUtil.getMonthName(reading.getDate()) + " - godz. " + reading.getHour(),
-                    BigDecimal.valueOf(reading.getAvgTemperature()).setScale(1, RoundingMode.HALF_UP),
+                    roundToNearestHalf(reading.getAvgTemperature()),
                     reading.getAvgHumidity().setScale(0, RoundingMode.HALF_UP),
                     Integer.parseInt(String.valueOf(reading.getAvgPressure().setScale(0, RoundingMode.HALF_UP))) / 100,
                     reading.getAvgLightIntensity().setScale(0, RoundingMode.HALF_UP)));
             count++;
         }
         return tableBody.toString();
+    }
+
+    private double roundToNearestHalf(double value) {
+        boolean isPositive = true;
+        if (value < 0) {
+            value = -value;
+            isPositive = false;
+        }
+
+        double integerPart = Math.floor(value);
+        double fractionalPart = value - integerPart;
+        double roundedFractionalPart;
+
+        if (fractionalPart < 0.25) {
+            roundedFractionalPart = 0.0;
+        } else if (fractionalPart < 0.75) {
+            roundedFractionalPart = 0.5;
+        } else {
+            roundedFractionalPart = 1.0;
+        }
+
+        double result = integerPart + roundedFractionalPart;
+        return isPositive ? result : -result;
     }
 
     private String setBackground(WeatherDataAverages currentReading, WeatherDataAverages highestTemp,
