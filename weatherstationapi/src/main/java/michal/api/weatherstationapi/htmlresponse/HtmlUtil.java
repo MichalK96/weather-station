@@ -38,4 +38,63 @@ public class HtmlUtil {
         return calender.get(Calendar.DAY_OF_MONTH);
     }
 
+    public static double roundToNearestHalf(double value) {
+        boolean isPositive = true;
+        if (value < 0) {
+            value = -value;
+            isPositive = false;
+        }
+
+        double integerPart = Math.floor(value);
+        double fractionalPart = value - integerPart;
+        double roundedFractionalPart;
+
+        if (fractionalPart < 0.25) {
+            roundedFractionalPart = 0.0;
+        } else if (fractionalPart < 0.75) {
+            roundedFractionalPart = 0.5;
+        } else {
+            roundedFractionalPart = 1.0;
+        }
+
+        double result = integerPart + roundedFractionalPart;
+        return isPositive ? result : -result;
+    }
+
+    public static String generateHtml(String name, String body) {
+        return String.format("""
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>%s</title>
+                        <style>
+                            table, th, td {
+                                font-size: 20px;
+                                border: 2px solid black;
+                                border-collapse: collapse;
+                                padding: 8px;
+                            }
+                            
+                            p {
+                                font-size: 20px;
+                               }
+                               
+                           a.button {
+                               padding: 4px 6px;
+                               border: 3px outset buttonborder;
+                               border-radius: 3px;
+                               color: buttontext;
+                               background-color: buttonface;
+                               text-decoration: none;
+                           }
+                        </style>
+                </head>
+                %s
+                </html>
+                                
+                """, name, body);
+    }
+
 }

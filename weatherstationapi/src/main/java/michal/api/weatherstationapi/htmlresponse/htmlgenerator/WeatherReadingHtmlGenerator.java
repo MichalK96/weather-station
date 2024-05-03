@@ -8,14 +8,14 @@ import michal.api.weatherstationapi.service.WeatherStationUnitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static michal.api.weatherstationapi.htmlresponse.htmlgenerator.HtmlUtil.generateHtml;
+import static michal.api.weatherstationapi.htmlresponse.HtmlUtil.generateHtml;
+
 
 @Service
 public class WeatherReadingHtmlGenerator {
@@ -53,7 +53,7 @@ public class WeatherReadingHtmlGenerator {
     public String listHoursSummaryByWeatherStationName(String weatherStationName, int hours) {
         var weatherDataAverages = weatherReadingService.calculateHourlyAverages(weatherStationName, hours);
         if (weatherDataAverages.isEmpty()) {
-            return "Nie znaleziono stacji o nazwie " + weatherStationName;
+            return "<br>Nie znaleziono odczytów lub stacji o nazwie " + weatherStationName;
         }
         return generateHoursSummary(weatherDataAverages, weatherStationName, hours);
     }
@@ -105,36 +105,13 @@ public class WeatherReadingHtmlGenerator {
                     count,
                     HtmlUtil.getDayOfWeekName(reading.getDate()) + " - " + HtmlUtil.getMonthDay(reading.getDate()) + " " +
                             HtmlUtil.getMonthName(reading.getDate()) + " - godz. " + reading.getHour(),
-                    roundToNearestHalf(reading.getAvgTemperature()),
+                    HtmlUtil.roundToNearestHalf(reading.getAvgTemperature()),
                     reading.getAvgHumidity().setScale(0, RoundingMode.HALF_UP),
                     Integer.parseInt(String.valueOf(reading.getAvgPressure().setScale(0, RoundingMode.HALF_UP))) / 100,
                     reading.getAvgLightIntensity().setScale(0, RoundingMode.HALF_UP)));
             count++;
         }
         return tableBody.toString();
-    }
-
-    private double roundToNearestHalf(double value) {
-        boolean isPositive = true;
-        if (value < 0) {
-            value = -value;
-            isPositive = false;
-        }
-
-        double integerPart = Math.floor(value);
-        double fractionalPart = value - integerPart;
-        double roundedFractionalPart;
-
-        if (fractionalPart < 0.25) {
-            roundedFractionalPart = 0.0;
-        } else if (fractionalPart < 0.75) {
-            roundedFractionalPart = 0.5;
-        } else {
-            roundedFractionalPart = 1.0;
-        }
-
-        double result = integerPart + roundedFractionalPart;
-        return isPositive ? result : -result;
     }
 
     private String setBackground(WeatherDataAverages currentReading, WeatherDataAverages highestTemp,
@@ -226,7 +203,7 @@ public class WeatherReadingHtmlGenerator {
                 """,
                 name,
                 getDate(weatherReading.getCreated()),
-                weatherReading.getTemperature(),
+                HtmlUtil.roundToNearestHalf(weatherReading.getTemperature()),
                 weatherReading.getHumidity(),
                 "%",
                 weatherReading.getPressure_hPa(),

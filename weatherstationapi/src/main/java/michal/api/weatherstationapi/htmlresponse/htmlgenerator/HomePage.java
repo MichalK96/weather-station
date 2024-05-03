@@ -1,5 +1,6 @@
 package michal.api.weatherstationapi.htmlresponse.htmlgenerator;
 
+import michal.api.weatherstationapi.htmlresponse.HtmlUtil;
 import michal.api.weatherstationapi.service.WeatherReadingService;
 import michal.api.weatherstationapi.service.WeatherStationUnitService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import static michal.api.weatherstationapi.htmlresponse.htmlgenerator.HtmlUtil.generateHtml;
+import static michal.api.weatherstationapi.htmlresponse.HtmlUtil.generateHtml;
 
 @Service
 public class HomePage {
@@ -16,7 +17,7 @@ public class HomePage {
     private final WeatherStationUnitService weatherStationUnitService;
     private final WeatherReadingService weatherReadingService;
 
-    static final String host = "host";
+    static final String host = "localhost";
     private final String weatherReadingUrl = "http://" + host + ":8080/api/html/weather-reading/";
     private final String weatherStationNameToDisplayReadingOnHomePage = "name";
 
@@ -80,7 +81,7 @@ public class HomePage {
                 <p>Barometr: %s hPa</p>
                 <p>Ilość światła: %s lux</p>
                 """,
-                weatherReading.getTemperature(),
+                HtmlUtil.roundToNearestHalf(weatherReading.getTemperature()),
                 weatherReading.getHumidity(),
                 "%",
                 weatherReading.getPressure_hPa(),
