@@ -1,6 +1,7 @@
 package michal.api.weatherstationapi.controller;
 
 import michal.api.weatherstationapi.dao.WeatherReadingDAO;
+import michal.api.weatherstationapi.service.WeatherDataAverages;
 import michal.api.weatherstationapi.service.WeatherReadingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,11 @@ public class WeatherReadingController {
     @GetMapping("/list/{weatherStationName}")
     public List<WeatherReadingDAO> listByWeatherStationName(@PathVariable String weatherStationName) {
         return weatherReadingService.listByWeatherStationName(weatherStationName);
+    }
+
+    @GetMapping("hours-summary/{weatherStationName}/{hours}")
+    public List<WeatherDataAverages> hoursSummary(@PathVariable String weatherStationName, @PathVariable int hours) {
+        return weatherReadingService.calculateHourlyAverages(weatherStationName, hours);
     }
 
     @GetMapping("/current-time")
